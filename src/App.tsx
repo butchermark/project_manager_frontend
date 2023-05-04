@@ -1,12 +1,13 @@
-import React from "react";
 import "./App.css";
+import { ProjectManagerProvider } from "./context/ProjectManagerContext";
+import { PageRouter } from "./router/PageRouter";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>asd</p>
-      </header>
+    <div className="app">
+      <ProjectManagerProvider>
+        <PageRouter />
+      </ProjectManagerProvider>
     </div>
   );
 }
