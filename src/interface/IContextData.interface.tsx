@@ -3,4 +3,6 @@ export interface IContextData {
   setLoading: any;
   accessToken: any;
   setAccessToken: any;
+  username: string;
+  setUsername: any;
 }

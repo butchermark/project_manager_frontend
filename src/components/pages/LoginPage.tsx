@@ -6,15 +6,16 @@ import { TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 export const LoginPage = () => {
-  const { setAccessToken, setLoading } = useContext(ProjectManagerContext);
-  const [username, setUsername] = useState("");
+  const { setAccessToken, setLoading, username, setUsername } = useContext(
+    ProjectManagerContext
+  );
   const [password, setPassword] = useState("");
   const [isSubmit, setIsSubmit] = useState(false);
   let navigate = useNavigate();
 
   useEffect(() => {
     if (isSubmit) {
-      const getUsers = async () => {
+      const getUser = async () => {
         try {
           //setLoading(true);
           await axios
@@ -23,12 +24,17 @@ export const LoginPage = () => {
               password: password,
             })
             .then((res) => {
-              console.log(res);
-              res.data && setIsSubmit(true);
-              setAccessToken(res.data.accesstoken);
-              res.data &&
+              if (res.data) {
+                setAccessToken(res.data.accesstoken);
+                setIsSubmit(true);
                 localStorage.setItem("accessToken", res.data.accesstoken);
-              navigate("/dashboard");
+                localStorage.setItem("user", JSON.stringify(res.data.user));
+              }
+              if (res.data.user.isAdmin === true) {
+                navigate("/usermanagement");
+              } else {
+                navigate("/dashboard");
+              }
             })
             .catch((err) => {
               setIsSubmit(false);
@@ -38,7 +44,7 @@ export const LoginPage = () => {
           setLoading(false);
         }
       };
-      getUsers();
+      getUser();
     }
   }, [isSubmit]);
 
@@ -46,6 +52,7 @@ export const LoginPage = () => {
     setIsSubmit(true);
     //setIsAccessToken(true);
   };
+
   return (
     <div className="login-panel">
       <h1>Login Page</h1>

@@ -1,75 +1,103 @@
+import React, { useEffect, useState } from "react";
+import { Navbar } from "../UI/Navbar";
+import { DefaultTable } from "../UI/DefaultTable";
+import axios from "axios";
 import {
-  Avatar,
-  Box,
   Button,
-  IconButton,
-  ListItemIcon,
   Menu,
   MenuItem,
-  Stack,
+  TableCell,
+  TableRow,
   Tooltip,
-  Typography,
-  AppBar,
-  Toolbar,
 } from "@mui/material";
-import Logout from "@mui/icons-material/Logout";
-import React from "react";
-import { useNavigate } from "react-router-dom";
 
 export const DashBoardPage = () => {
+  const [taskStatus, setTaskStatus] = useState("");
+  const [taskId, setTaskId] = useState("");
+  const [tableData, setTableData] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const userId = JSON.parse(localStorage.getItem("user") || "{}").id;
   const open = Boolean(anchorEl);
-  let navigate = useNavigate();
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleLogout = () => {
-    setAnchorEl(null);
-    navigate("/login");
-  };
+
+  useEffect(() => {
+    const getTasks = async () => {
+      await axios
+        .get(`http://localhost:3000/user/${userId}/tasks`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        })
+        .then((res) => {
+          setTableData(res.data);
+        });
+    };
+    getTasks();
+  }, [taskStatus]);
+
+  useEffect(() => {
+    const updateTask = async () => {
+      try {
+        await axios.put(
+          `http://localhost:3000/task/${taskId}`,
+          {
+            status: taskStatus,
+            userId: userId,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    updateTask();
+  }, [taskStatus]);
+
   const handleClose = () => {
     setAnchorEl(null);
   };
 
+  const handleUpdate = async (event: any) => {
+    setTaskStatus(event.target.textContent);
+    setTaskId(anchorEl ? anchorEl.id.toString() : "");
+    setAnchorEl(null);
+  };
+
+  const handleClick = (event: any) => {
+    setAnchorEl(event.currentTarget);
+  };
   return (
     <React.Fragment>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
-            Project Manager
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <Button color="inherit">User Management</Button>
-            <Button color="inherit">Project Management</Button>
-            <Button color="inherit">Task Management</Button>
-          </Stack>
-          <Tooltip title="Account Menu">
-            <IconButton
-              onClick={handleClick}
-              size="medium"
-              sx={{ ml: 2 }}
-              aria-controls={open ? "account-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? "true" : undefined}
-            >
-              <Avatar sx={{ width: 64, height: 64 }}>U</Avatar>
-            </IconButton>
-          </Tooltip>
-          <Menu
-            anchorEl={anchorEl}
-            id="account-menu"
-            open={open}
-            onClose={handleClose}
-          >
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <Logout fontSize="medium" />
-              </ListItemIcon>
-              Logout
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+      <Navbar />
+      <DefaultTable
+        headers={["Name", "Description", "Status", "Archived", " "]}
+        data={tableData.map((task: any) => (
+          <TableRow key={task.id}>
+            <TableCell>{task.name}</TableCell>
+            <TableCell>{task.description}</TableCell>
+            <TableCell>{task.status}</TableCell>
+            <TableCell>{task.archived ? "Archived" : "Unarchived "}</TableCell>
+            <TableCell>
+              <Tooltip title="Update">
+                <Button id={task.id} onClick={(e) => handleClick(e)}>
+                  Update
+                </Button>
+              </Tooltip>
+              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
+                  In Progress
+                </MenuItem>
+                <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
+                  Done
+                </MenuItem>
+              </Menu>
+            </TableCell>
+          </TableRow>
+        ))}
+      ></DefaultTable>
     </React.Fragment>
   );
 };
