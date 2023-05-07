@@ -3,19 +3,12 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import { Navbar } from "../UI/Navbar";
 import { DefaultTable } from "../UI/DefaultTable";
-import {
-  TableRow,
-  TableCell,
-  Tooltip,
-  Button,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import { TableRow, TableCell, Button } from "@mui/material";
 
 export const UserManagementPage = () => {
   const [tableData, setTableData] = useState([]);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const [suspendStatus, setSuspendStatus] = useState(false);
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     const getAllUsers = async () => {
@@ -35,38 +28,86 @@ export const UserManagementPage = () => {
     };
     getAllUsers();
   }, []);
-  const handleClick = (event: any) => {
-    setAnchorEl(event.currentTarget);
+
+  useEffect(() => {
+    const changeUserStatus = async () => {
+      if (suspendStatus === false) {
+        try {
+          await axios
+            .put(
+              `http://localhost:3000/user/${userId}`,
+              {
+                isSuspended: true,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "accessToken"
+                  )}`,
+                },
+              }
+            )
+            .then((res) => {
+              setTableData(res.data);
+              console.group(typeof res.data);
+            });
+        } catch (err) {
+          console.log(err);
+        }
+      } else {
+        try {
+          await axios
+            .put(
+              `http://localhost:3000/user/${userId}`,
+              {
+                isSuspended: false,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "accessToken"
+                  )}`,
+                },
+              }
+            )
+            .then((res) => {
+              setTableData(res.data); //Ez az ami hianyzott
+              console.log(typeof res.data);
+            });
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    };
+    changeUserStatus();
+  }, [suspendStatus, userId]);
+
+  const handleSuspend = (userId: string, status: boolean) => {
+    setSuspendStatus(status);
+    setUserId(userId);
+    console.log(userId);
   };
-  const asd = () => {
-    console.log("ASD");
-  };
+
   return (
     <React.Fragment>
       <Navbar />
       <DefaultTable
-        headers={["Name", "Email", "Role", "Suspended", "Last Login"]}
+        headers={["Name", "Email", "Role", "Account Status", "Last Login"]}
         data={tableData.map((user: any) => (
           <TableRow key={user.id}>
             <TableCell>{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.isAdmin ? "Admin" : "User"}</TableCell>
-            <TableCell>{user.isSuspended ? "Suspended" : "Active "}</TableCell>
+            <TableCell>{user.isSuspended ? "Active" : "Suspended"}</TableCell>
             <TableCell>{user.lastLogin}</TableCell>
             <TableCell>
-              <Tooltip title="Update">
-                <Button id={user.id} onClick={asd}>
-                  Update
-                </Button>
-              </Tooltip>
-              <Menu anchorEl={anchorEl} open={open} onClose={asd}>
-                <MenuItem id={user.id} onClick={asd}>
-                  In Progress
-                </MenuItem>
-                <MenuItem id={user.id} onClick={asd}>
-                  Done
-                </MenuItem>
-              </Menu>
+              <Button
+                variant="contained"
+                id={user.id}
+                onClick={(e) => handleSuspend(user.id, user.isSuspended)}
+              >
+                {user.isSuspended ? "Re-activate" : "Suspend"}
+              </Button>
             </TableCell>
           </TableRow>
         ))}

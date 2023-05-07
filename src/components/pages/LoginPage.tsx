@@ -30,10 +30,13 @@ export const LoginPage = () => {
                 localStorage.setItem("accessToken", res.data.accesstoken);
                 localStorage.setItem("user", JSON.stringify(res.data.user));
               }
-              if (res.data.user.isAdmin === true) {
-                navigate("/usermanagement");
+              if (res.data.user.isSuspended) {
+                window.alert("Account is Suspended");
+                setIsSubmit(false);
               } else {
-                navigate("/dashboard");
+                navigate(
+                  res.data.user.isAdmin ? "/usermanagement" : "/dashboard"
+                );
               }
             })
             .catch((err) => {
