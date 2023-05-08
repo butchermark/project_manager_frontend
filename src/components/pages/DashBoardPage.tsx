@@ -20,48 +20,53 @@ export const DashBoardPage = () => {
   const open = Boolean(anchorEl);
 
   useEffect(() => {
-    const getTasks = async () => {
-      await axios
-        .get(`http://localhost:3000/user/${userId}/tasks`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        })
-        .then((res) => {
-          setTableData(res.data);
-        });
-    };
-    getTasks();
-  }, [taskStatus]);
-
-  useEffect(() => {
-    const updateTask = async () => {
+    const fetchTasks = async () => {
       try {
-        await axios.put(
-          `http://localhost:3000/task/${taskId}`,
-          {
-            status: taskStatus,
-            userId: userId,
-          },
+        const res = await axios.get(
+          `http://localhost:3000/user/${userId}/tasks`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );
+        setTableData(res.data);
       } catch (err) {
         console.log(err);
       }
     };
-    updateTask();
-  }, [taskStatus]);
+    fetchTasks();
+
+    if (taskStatus) {
+      const updateTask = async () => {
+        try {
+          await axios.put(
+            `http://localhost:3000/task/${taskId}`,
+            {
+              status: taskStatus,
+              userId: userId,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            }
+          );
+          fetchTasks();
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      updateTask();
+    }
+  }, [taskStatus, taskId, userId]);
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
   const handleUpdate = async (event: any) => {
-    setTaskStatus(event.target.textContent);
+    setTaskStatus(event.currentTarget.textContent);
     setTaskId(anchorEl ? anchorEl.id.toString() : "");
     setAnchorEl(null);
   };
@@ -76,6 +81,7 @@ export const DashBoardPage = () => {
         headers={["Name", "Description", "Status", "Archived", " "]}
         data={tableData.map((task: any) => (
           <TableRow key={task.id}>
+            <TableCell>{task.id}</TableCell>
             <TableCell>{task.name}</TableCell>
             <TableCell>{task.description}</TableCell>
             <TableCell>{task.status}</TableCell>

@@ -9,6 +9,8 @@ export const UserManagementPage = () => {
   const [tableData, setTableData] = useState([]);
   const [suspendStatus, setSuspendStatus] = useState(false);
   const [userId, setUserId] = useState("");
+  const [deletingUser, setDeletingUser] = useState(false);
+  const [suspendingUser, setSuspendingUser] = useState(false);
 
   useEffect(() => {
     const getAllUsers = async () => {
@@ -30,8 +32,8 @@ export const UserManagementPage = () => {
   }, []);
 
   useEffect(() => {
-    const changeUserStatus = async () => {
-      if (suspendStatus === false) {
+    const userAction = async () => {
+      if (suspendingUser && !suspendStatus) {
         try {
           await axios
             .put(
@@ -49,12 +51,27 @@ export const UserManagementPage = () => {
             )
             .then((res) => {
               setTableData(res.data);
-              console.group(typeof res.data);
+              console.group(res.data);
             });
         } catch (err) {
           console.log(err);
         }
-      } else {
+      } else if (deletingUser) {
+        try {
+          await axios
+            .delete(`http://localhost:3000/user/${userId}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            })
+            .then((res) => {
+              setTableData(res.data);
+              console.log(res.data);
+            });
+        } catch (err) {
+          console.log(err);
+        }
+      } else if (suspendingUser && suspendStatus) {
         try {
           await axios
             .put(
@@ -71,7 +88,7 @@ export const UserManagementPage = () => {
               }
             )
             .then((res) => {
-              setTableData(res.data); //Ez az ami hianyzott
+              setTableData(res.data);
               console.log(typeof res.data);
             });
         } catch (err) {
@@ -79,13 +96,21 @@ export const UserManagementPage = () => {
         }
       }
     };
-    changeUserStatus();
+    userAction();
+    setDeletingUser(false);
+    setSuspendingUser(false);
   }, [suspendStatus, userId]);
 
   const handleSuspend = (userId: string, status: boolean) => {
+    setSuspendingUser(true);
     setSuspendStatus(status);
     setUserId(userId);
-    console.log(userId);
+    console.log(status);
+  };
+
+  const handleDelete = (userId: string) => {
+    setDeletingUser(true);
+    setUserId(userId);
   };
 
   return (
@@ -98,7 +123,7 @@ export const UserManagementPage = () => {
             <TableCell>{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.isAdmin ? "Admin" : "User"}</TableCell>
-            <TableCell>{user.isSuspended ? "Active" : "Suspended"}</TableCell>
+            <TableCell>{user.isSuspended ? "Suspended" : "Active"}</TableCell>
             <TableCell>{user.lastLogin}</TableCell>
             <TableCell>
               <Button
@@ -107,6 +132,14 @@ export const UserManagementPage = () => {
                 onClick={(e) => handleSuspend(user.id, user.isSuspended)}
               >
                 {user.isSuspended ? "Re-activate" : "Suspend"}
+              </Button>
+              <Button
+                color="warning"
+                variant="outlined"
+                id={user.id}
+                onClick={(e) => handleDelete(user.id)}
+              >
+                Delete
               </Button>
             </TableCell>
           </TableRow>
