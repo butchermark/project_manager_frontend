@@ -1,10 +1,18 @@
 import { useContext, useEffect, useState } from "react";
-import "../pages/LoginPage.css";
 import Button from "@mui/material/Button";
 import ProjectManagerContext from "../../context/ProjectManagerContext";
-import { TextField } from "@mui/material";
+import LoginIcon from "@mui/icons-material/Login";
+import {
+  Container,
+  TextField,
+  ThemeProvider,
+  Typography,
+  createTheme,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ReactComponent as Logo } from "../UI/logo/logoBig.svg";
+
 export const LoginPage = () => {
   const { setAccessToken, setLoading, username, setUsername } = useContext(
     ProjectManagerContext
@@ -12,6 +20,16 @@ export const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [isSubmit, setIsSubmit] = useState(false);
   let navigate = useNavigate();
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#0e055f",
+      },
+      secondary: {
+        main: "#ffffff",
+      },
+    },
+  });
 
   useEffect(() => {
     if (isSubmit) {
@@ -53,37 +71,85 @@ export const LoginPage = () => {
 
   const handleSubmit = () => {
     setIsSubmit(true);
-    //setIsAccessToken(true);
   };
 
   return (
-    <div className="login-panel">
-      <h1>Login Page</h1>
-      <div className="login-inputs">
-        <p>Name</p>
-        <TextField
-          type="text"
-          className="login-input-field"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <p>Password</p>
-        <TextField
-          type="text"
-          className="login-input-field"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button
-          type="button"
-          className="submit-button"
-          disabled={isSubmit}
-          onClick={handleSubmit}
-          variant="contained"
+    <Container
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        height: "100vh",
+      }}
+    >
+      <ThemeProvider theme={theme}>
+        <Container
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "row",
+            paddingTop: 5,
+          }}
         >
-          Submit
-        </Button>
-      </div>
-    </div>
+          <Logo />
+          <Typography
+            paddingLeft={2}
+            variant="h2"
+            component="div"
+            fontWeight={500}
+            maxWidth={440}
+            textAlign={"center"}
+            color={"#0e055f"}
+            sx={{ flexGrow: 1 }}
+          >
+            Project Manager
+          </Typography>
+        </Container>
+        <Container
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "left",
+            flexDirection: "column",
+          }}
+        >
+          <Typography>Name</Typography>
+          <TextField
+            type="text"
+            className="login-input-field"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <Typography sx={{ marginTop: 2 }}>Password</Typography>
+          <TextField
+            type="text"
+            className="login-input-field"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </Container>
+        <Container
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+          }}
+        >
+          <Button
+            type="button"
+            className="submit-button"
+            disabled={isSubmit}
+            onClick={handleSubmit}
+            variant="contained"
+            sx={{ marginTop: 2 }}
+          >
+            <LoginIcon />
+          </Button>
+        </Container>
+      </ThemeProvider>
+    </Container>
   );
 };

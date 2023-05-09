@@ -1,4 +1,3 @@
-import "./App.css";
 import { ProjectManagerProvider } from "./context/ProjectManagerContext";
 import { PageRouter } from "./router/PageRouter";
 

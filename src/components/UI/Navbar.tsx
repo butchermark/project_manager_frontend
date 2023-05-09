@@ -30,7 +30,6 @@ export const Navbar = () => {
   };
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
-    //setLoading(false);
     setAnchorEl(null);
     navigate("/login");
   };
@@ -41,7 +40,7 @@ export const Navbar = () => {
   const theme = createTheme({
     palette: {
       primary: {
-        main: "#3c0c62",
+        main: "#0e055f",
       },
       secondary: {
         main: "#ffffff",
@@ -66,9 +65,24 @@ export const Navbar = () => {
                 Project Manager
               </Typography>
               <Stack direction="row" spacing={2}>
-                <Button color="secondary">User Management</Button>
-                <Button color="secondary">Project Management</Button>
-                <Button color="secondary">Task Management</Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate("/usermanagement")}
+                >
+                  User Management
+                </Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate("/projectmanagement")}
+                >
+                  Project Management
+                </Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate("/taskmanagement")}
+                >
+                  Task Management
+                </Button>
               </Stack>
               <Tooltip title="Account">
                 <IconButton

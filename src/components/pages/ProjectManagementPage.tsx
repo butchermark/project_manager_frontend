@@ -1,3 +1,24 @@
+import { ThemeProvider } from "@emotion/react";
+import { createTheme } from "@mui/material";
+import React from "react";
+import { Navbar } from "../UI/Navbar";
+
 export const ProjectManagementPage = () => {
-  return <div>ProjectManagementPage</div>;
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#0e055f",
+      },
+      secondary: {
+        main: "#ffffff",
+      },
+    },
+  });
+  return (
+    <React.Fragment>
+      <ThemeProvider theme={theme}>
+        <Navbar />
+      </ThemeProvider>
+    </React.Fragment>
+  );
 };

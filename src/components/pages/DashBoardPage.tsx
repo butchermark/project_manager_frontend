@@ -81,7 +81,6 @@ export const DashBoardPage = () => {
         headers={["Name", "Description", "Status", "Archived", " "]}
         data={tableData.map((task: any) => (
           <TableRow key={task.id}>
-            <TableCell>{task.id}</TableCell>
             <TableCell>{task.name}</TableCell>
             <TableCell>{task.description}</TableCell>
             <TableCell>{task.status}</TableCell>
