@@ -1,14 +1,13 @@
 import {
+  Modal,
   Container,
+  Box,
   Typography,
   TextField,
-  Modal,
-  Box,
   Button,
 } from "@mui/material";
-import AddCircleOutLineIcon from "@mui/icons-material/AddCircle";
 
-export const UserForm = (props: any) => {
+export const EditUserPanel = (props: any) => {
   return (
     <Modal
       sx={{ display: "flex", alignItems: "center" }}
@@ -20,7 +19,7 @@ export const UserForm = (props: any) => {
           display: "flex",
           flexDirection: "column",
           maxWidth: 400,
-          maxHeight: 400,
+          maxHeight: 530,
           backgroundColor: "white",
           padding: 3,
           width: "100%",
@@ -43,19 +42,23 @@ export const UserForm = (props: any) => {
           }}
         >
           <Typography>Name</Typography>
-          <TextField onChange={(e) => props.username(e)} />
-          <Typography>E-mail</Typography>
-          <TextField onChange={(e) => props.useremail(e)} />
-          <Typography>Password</Typography>
-          <TextField onChange={(e) => props.userpassword(e)} />
+          <TextField
+            sx={{ height: "30px", marginBottom: 3 }}
+            onChange={(e) => props.username(e)}
+          />
+          <Typography>Email</Typography>
+          <TextField
+            sx={{ height: "30px", marginBottom: 3 }}
+            onChange={(e) => props.useremail(e)}
+          />
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
+              onClick={props.submit}
               color="success"
               variant="contained"
               sx={{ width: 10, marginTop: 2 }}
-              onClick={props.submit}
             >
-              <AddCircleOutLineIcon />
+              Edit
             </Button>
           </Box>
         </Box>

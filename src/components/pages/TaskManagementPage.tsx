@@ -1,7 +1,6 @@
 import { ThemeProvider } from "@emotion/react";
 import {
   Button,
-  ListItemIcon,
   Menu,
   MenuItem,
   TableCell,
@@ -11,11 +10,13 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React, { useCallback, useEffect, useState } from "react";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { Navbar } from "../UI/Navbar";
 import { DefaultTable } from "../UI/DefaultTable";
 import axios from "axios";
 import { EditTaskPanel } from "../UI/EditTaskPanel";
-import { Logout } from "@mui/icons-material";
+import EditIcon from "@mui/icons-material/Edit";
+import { CreateTaskPanel } from "../UI/CreateTaskPanel";
 
 export const TaskManagementPage = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -28,15 +29,18 @@ export const TaskManagementPage = () => {
   const [originalTaskName, setOriginalTaskName] = useState("");
   const [originalTaskDescription, setOriginalTaskDescription] = useState("");
   const [originalTaskStatus, setOriginalTaskStatus] = useState("");
-  const [originalTaskUserId, setOriginalTaskUserId] = useState("");
-  const [originalTaskProjectId, setOriginalTaskProjectId] = useState("");
   const [deletingTask, setDeletingTask] = useState(false);
   const [edit, setEdit] = useState(false);
   const [addingUserToTask, setAddingUserToTask] = useState(false);
   const [removingUserFromTask, setRemovingUserFromTask] = useState(false);
   const [userId, setUserId] = useState("");
   const [users, setUsers] = useState([]);
+  const [create, setCreate] = useState(false);
+  const [creatingTask, setCreatingTask] = useState(false);
+  const [projectId, setProjectId] = useState("");
+  const [projectName, setProjectName] = useState("");
   const open = Boolean(anchorEl);
+
   const theme = createTheme({
     palette: {
       primary: {
@@ -67,7 +71,6 @@ export const TaskManagementPage = () => {
               }
             });
             setTableData(res.data);
-            console.log(res.data);
           });
       } catch (err) {
         console.log(err);
@@ -76,7 +79,42 @@ export const TaskManagementPage = () => {
     fetchTasks();
   }, [removingUserFromTask, addingUserToTask]);
 
-  const updateTask = useCallback(async () => {
+  const createTask = useCallback(async () => {
+    try {
+      await axios
+        .post(
+          `http://localhost:3000/project/${projectId}/task`,
+          {
+            name: taskName,
+            description: taskDescription,
+            status: taskStatus,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res.data);
+          res.data.forEach((task: any) => {
+            if (task.user === null) {
+              task.user = { name: "No user" };
+            }
+            if (task.project === null) {
+              task.project = { name: "No project" };
+            }
+          });
+          setTableData(res.data);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+    setCreatingTask(false);
+    setCreate(false);
+  }, [create]);
+
+  const editTask = useCallback(async () => {
     try {
       await axios
         .put(
@@ -102,7 +140,6 @@ export const TaskManagementPage = () => {
             }
           });
           setTableData(res.data);
-          console.log(res.data);
         });
     } catch (err) {
       console.log(err);
@@ -129,7 +166,6 @@ export const TaskManagementPage = () => {
             }
           });
           setTableData(res.data);
-          console.log(res.data);
         });
     } catch (err) {
       console.log(err);
@@ -156,7 +192,6 @@ export const TaskManagementPage = () => {
 
   const removeUserFromTask = useCallback(async () => {
     try {
-      console.log(taskId);
       await axios.delete(`http://localhost:3000/user/${taskId}/task`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -185,42 +220,37 @@ export const TaskManagementPage = () => {
   }, []);
 
   useEffect(() => {
-    getAllUsers();
-    if (edit) {
-      updateTask();
+    switch (true) {
+      case edit:
+        editTask();
+        break;
+      case deletingTask:
+        deleteTask();
+        break;
+      case addingUserToTask:
+        addUserToTask();
+        break;
+      case removingUserFromTask:
+        removeUserFromTask();
+        break;
+      case create:
+        createTask();
+        break;
+      default:
+        getAllUsers();
+        break;
     }
-    if (deletingTask) {
-      deleteTask();
-    }
-    if (addingUserToTask) {
-      addUserToTask();
-    }
-    if (removingUserFromTask) {
-      removeUserFromTask();
-    }
-    if (addingUserToTask) {
-      addUserToTask();
-    }
-  }, [
-    edit,
-    deletingTask,
-    addingUserToTask,
-    removingUserFromTask,
-    addingUserToTask,
-  ]);
+  }, [create, edit, deletingTask, addingUserToTask, removingUserFromTask]);
 
   const handleStartEdit = (task: any) => {
     setTaskId(task.id);
     setOriginalTaskName(task.name);
     setOriginalTaskDescription(task.description);
     setOriginalTaskStatus(task.status);
-    setOriginalTaskUserId(task.user.id);
-    setOriginalTaskProjectId(task.project.id);
     setEditingTask(true);
   };
   const handleEdit = () => {
     setEdit(true);
-    console.log(taskName, taskDescription, taskStatus);
   };
 
   const handleDelete = (taskId: string) => {
@@ -233,7 +263,6 @@ export const TaskManagementPage = () => {
     setUserId(userId);
     setAddingUserToTask(true);
     setAnchorEl(null);
-    console.log(userId, taskId);
   };
   const handleRemoveUserFromTask = (taskId: string) => {
     setRemovingUserFromTask(true);
@@ -242,6 +271,14 @@ export const TaskManagementPage = () => {
 
   const handleClickOnDropDown = (event: any) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const handleStartCreate = () => {
+    setCreatingTask(true);
+  };
+
+  const handleCreate = () => {
+    setCreate(true);
   };
 
   const handleClose = () => {
@@ -260,7 +297,25 @@ export const TaskManagementPage = () => {
           taskdescription={(e: any) => setTaskDescription(e.target.value)}
           taskstatus={(e: any) => setTaskStatus(e.target.value)}
         ></EditTaskPanel>
+        <CreateTaskPanel
+          close={() => setCreatingTask(false)}
+          status={creatingTask}
+          method={"Create task"}
+          submit={handleCreate}
+          taskname={(e: any) => setTaskName(e.target.value)}
+          taskdescription={(e: any) => setTaskDescription(e.target.value)}
+          taskstatus={(e: any) => setTaskStatus(e.target.value)}
+          projectId={setProjectId}
+          projectName={setProjectName}
+        ></CreateTaskPanel>
         <Navbar />
+        <Button
+          variant="contained"
+          color="success"
+          onClick={() => handleStartCreate()}
+        >
+          <AddCircleIcon />
+        </Button>
         <DefaultTable
           headers={[
             "Name",
@@ -281,7 +336,7 @@ export const TaskManagementPage = () => {
               <TableCell>
                 {task.archived ? "Archived" : "Unarchived "}
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ display: "flex", flexDirection: "row" }}>
                 {task.user.name === "No user" && (
                   <div>
                     <Tooltip title="Add User">
@@ -325,7 +380,7 @@ export const TaskManagementPage = () => {
                   variant="contained"
                   onClick={() => handleStartEdit(task)}
                 >
-                  Edit
+                  <EditIcon />
                 </Button>
                 <Button
                   color="error"

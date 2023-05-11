@@ -4,6 +4,8 @@ import React from "react";
 import { Navbar } from "../UI/Navbar";
 
 export const ProjectManagementPage = () => {
+  const managerId = JSON.parse(localStorage.getItem("user") ?? "").id;
+  const managerName = JSON.parse(localStorage.getItem("user") ?? "").name;
   const theme = createTheme({
     palette: {
       primary: {

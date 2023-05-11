@@ -14,7 +14,9 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BlockIcon from "@mui/icons-material/Block";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
-import { UserForm } from "../UI/UserForm";
+import { CreateUserPanel } from "../UI/CreateUserPanel";
+import { EditUserPanel } from "../UI/EditUserPanel";
+import EditIcon from "@mui/icons-material/Edit";
 
 export const UserManagementPage = () => {
   const [tableData, setTableData] = useState([]);
@@ -23,10 +25,16 @@ export const UserManagementPage = () => {
   const [deletingUser, setDeletingUser] = useState(false);
   const [suspendingUser, setSuspendingUser] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+  const [userName, setCreateUserName] = useState("");
+  const [userEmail, setCreateUserEmail] = useState("");
+  const [userPassword, setCreateUserPassword] = useState("");
   const [create, setCreate] = useState(false);
+  const [editUserName, setEditUserName] = useState("");
+  const [editUserEmail, setEditUserEmail] = useState("");
+  const [editingUser, setEditingUser] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [originalUserName, setOriginalUserName] = useState("");
+  const [originalUserEmail, setOriginalUserEmail] = useState("");
   const theme = createTheme({
     palette: {
       primary: {
@@ -145,15 +153,50 @@ export const UserManagementPage = () => {
     setCreate(false);
   }, [create]);
 
+  const editUser = useCallback(async () => {
+    try {
+      await axios
+        .put(
+          `http://localhost:3000/user/${userId}`,
+          {
+            name: editUserName || originalUserName,
+            email: editUserEmail || originalUserEmail,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        )
+        .then((res) => {
+          setTableData(res.data);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+    setEdit(false);
+    setEditingUser(false);
+  }, [edit]);
+
   useEffect(() => {
-    if (suspendingUser && !suspendStatus) {
-      suspendUser();
-    } else if (deletingUser) {
-      deleteUser();
-    } else if (suspendingUser && suspendStatus) {
-      unsuspendUser();
-    } else if (create) {
-      createUser();
+    switch (true) {
+      case suspendingUser && !suspendStatus:
+        suspendUser();
+        break;
+      case deletingUser:
+        deleteUser();
+        break;
+      case suspendingUser && suspendStatus:
+        unsuspendUser();
+        break;
+      case create:
+        createUser();
+        break;
+      case edit:
+        editUser();
+        break;
+      default:
+        break;
     }
     setDeletingUser(false);
     setSuspendingUser(false);
@@ -161,10 +204,11 @@ export const UserManagementPage = () => {
     suspendingUser,
     suspendStatus,
     deletingUser,
+    edit,
     suspendUser,
     unsuspendUser,
     deleteUser,
-    creatingUser,
+    createUser,
   ]);
 
   const handleSuspend = (userId: string, status: boolean) => {
@@ -183,18 +227,37 @@ export const UserManagementPage = () => {
     setCreate(true);
   };
 
+  const handleStartEdit = (user: any) => {
+    setUserId(user.id);
+    setOriginalUserName(user.name);
+    setOriginalUserEmail(user.email);
+    setEditingUser(true);
+  };
+
+  const handleEdit = () => {
+    setEdit(true);
+  };
+
   return (
     <React.Fragment>
       <ThemeProvider theme={theme}>
-        <UserForm
+        <EditUserPanel
+          close={() => setEditingUser(false)}
+          status={editingUser}
+          method={"Edit user"}
+          submit={handleEdit}
+          username={(e: any) => setEditUserName(e.target.value)}
+          useremail={(e: any) => setEditUserEmail(e.target.value)}
+        ></EditUserPanel>
+        <CreateUserPanel
           close={() => setCreatingUser(false)}
           status={creatingUser}
           method={"Create new User"}
-          username={(e: any) => setUserName(e.target.value)}
-          useremail={(e: any) => setUserEmail(e.target.value)}
-          userpassword={(e: any) => setUserPassword(e.target.value)}
+          username={(e: any) => setCreateUserName(e.target.value)}
+          useremail={(e: any) => setCreateUserEmail(e.target.value)}
+          userpassword={(e: any) => setCreateUserPassword(e.target.value)}
           submit={handleCreate}
-        ></UserForm>
+        ></CreateUserPanel>
 
         <Navbar />
         <Button
@@ -212,12 +275,23 @@ export const UserManagementPage = () => {
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.isAdmin ? "Admin" : "User"}</TableCell>
               <TableCell>{user.isSuspended ? "Suspended" : "Active"}</TableCell>
-              <TableCell>{user.lastLogin}</TableCell>
+              <TableCell>
+                {user.lastLogin === "2000-01-01"
+                  ? "Not logged yet"
+                  : user.lastLogin}
+              </TableCell>
               <TableCell>
                 <Button
                   variant="contained"
+                  onClick={() => handleStartEdit(user)}
+                >
+                  <EditIcon />
+                </Button>
+                <Button
+                  variant="contained"
                   id={user.id}
-                  onClick={(e) => handleSuspend(user.id, user.isSuspended)}
+                  onClick={() => handleSuspend(user.id, user.isSuspended)}
+                  title={user.isSuspended ? "Unsuspend" : "Suspend"}
                 >
                   {user.isSuspended ? <PowerSettingsNewIcon /> : <BlockIcon />}
                 </Button>
@@ -225,7 +299,7 @@ export const UserManagementPage = () => {
                   color="error"
                   variant="outlined"
                   id={user.id}
-                  onClick={(e) => handleDelete(user.id)}
+                  onClick={() => handleDelete(user.id)}
                 >
                   <DeleteIcon />
                 </Button>

@@ -73,15 +73,15 @@ export const Navbar = () => {
                 </Button>
                 <Button
                   color="secondary"
-                  onClick={() => navigate("/projectmanagement")}
-                >
-                  Project Management
-                </Button>
-                <Button
-                  color="secondary"
                   onClick={() => navigate("/taskmanagement")}
                 >
                   Task Management
+                </Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate("/projectmanagement")}
+                >
+                  Project Management
                 </Button>
               </Stack>
               <Tooltip title="Account">
