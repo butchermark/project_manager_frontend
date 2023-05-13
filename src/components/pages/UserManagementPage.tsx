@@ -20,21 +20,17 @@ import EditIcon from "@mui/icons-material/Edit";
 
 export const UserManagementPage = () => {
   const [tableData, setTableData] = useState([]);
-  const [suspendStatus, setSuspendStatus] = useState(false);
   const [userId, setUserId] = useState("");
-  const [deletingUser, setDeletingUser] = useState(false);
-  const [suspendingUser, setSuspendingUser] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
   const [userName, setCreateUserName] = useState("");
   const [userEmail, setCreateUserEmail] = useState("");
   const [userPassword, setCreateUserPassword] = useState("");
-  const [create, setCreate] = useState(false);
   const [editUserName, setEditUserName] = useState("");
   const [editUserEmail, setEditUserEmail] = useState("");
   const [editingUser, setEditingUser] = useState(false);
-  const [edit, setEdit] = useState(false);
   const [originalUserName, setOriginalUserName] = useState("");
   const [originalUserEmail, setOriginalUserEmail] = useState("");
+  const [isReload, setIsReload] = useState(true);
   const theme = createTheme({
     palette: {
       primary: {
@@ -57,73 +53,14 @@ export const UserManagementPage = () => {
           })
           .then((res) => {
             setTableData(res.data);
+            setIsReload(false);
           });
       } catch (err) {
         console.log(err);
       }
     };
     getAllUsers();
-  }, []);
-
-  const suspendUser = useCallback(async () => {
-    try {
-      await axios
-        .put(
-          `http://localhost:3000/user/${userId}`,
-          {
-            isSuspended: true,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        )
-        .then((res) => {
-          setTableData(res.data);
-        });
-    } catch (err) {
-      console.log(err);
-    }
-  }, [setTableData, userId]);
-
-  const unsuspendUser = useCallback(async () => {
-    try {
-      await axios
-        .put(
-          `http://localhost:3000/user/${userId}`,
-          {
-            isSuspended: false,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        )
-        .then((res) => {
-          setTableData(res.data);
-        });
-    } catch (err) {
-      console.log(err);
-    }
-  }, [setTableData, userId]);
-
-  const deleteUser = useCallback(async () => {
-    try {
-      await axios
-        .delete(`http://localhost:3000/user/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        })
-        .then((res) => {
-          setTableData(res.data);
-        });
-    } catch (err) {
-      console.log(err);
-    }
-  }, [setTableData, userId]);
+  }, [isReload]);
 
   const createUser = useCallback(async () => {
     try {
@@ -144,14 +81,13 @@ export const UserManagementPage = () => {
           }
         )
         .then((res) => {
-          setTableData(res.data);
+          setIsReload(true);
         });
     } catch (err) {
       console.log(err);
     }
     setCreatingUser(false);
-    setCreate(false);
-  }, [create]);
+  }, [userName, userEmail, userPassword]);
 
   const editUser = useCallback(async () => {
     try {
@@ -169,62 +105,92 @@ export const UserManagementPage = () => {
           }
         )
         .then((res) => {
-          setTableData(res.data);
+          setIsReload(true);
         });
     } catch (err) {
       console.log(err);
     }
-    setEdit(false);
     setEditingUser(false);
-  }, [edit]);
+  }, [userId, editUserEmail, editUserName]);
 
-  useEffect(() => {
-    switch (true) {
-      case suspendingUser && !suspendStatus:
-        suspendUser();
-        break;
-      case deletingUser:
-        deleteUser();
-        break;
-      case suspendingUser && suspendStatus:
-        unsuspendUser();
-        break;
-      case create:
-        createUser();
-        break;
-      case edit:
-        editUser();
-        break;
-      default:
-        break;
+  const deleteUser = useCallback(
+    async (userId: string) => {
+      try {
+        await axios
+          .delete(`http://localhost:3000/user/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          })
+          .then((res) => {
+            setIsReload(true);
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [userId]
+  );
+
+  const suspendUser = useCallback(async (userId: string) => {
+    try {
+      await axios
+        .put(
+          `http://localhost:3000/user/${userId}`,
+          {
+            isSuspended: true,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        )
+        .then((res) => {
+          setIsReload(true);
+        });
+    } catch (err) {
+      console.log(err);
     }
-    setDeletingUser(false);
-    setSuspendingUser(false);
-  }, [
-    suspendingUser,
-    suspendStatus,
-    deletingUser,
-    edit,
-    suspendUser,
-    unsuspendUser,
-    deleteUser,
-    createUser,
-  ]);
+  }, []);
+
+  const unsuspendUser = useCallback(async (userId: string) => {
+    try {
+      await axios
+        .put(
+          `http://localhost:3000/user/${userId}`,
+          {
+            isSuspended: false,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        )
+        .then((res) => {
+          setIsReload(true);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
 
   const handleSuspend = (userId: string, status: boolean) => {
-    setSuspendingUser(true);
-    setSuspendStatus(status);
-    setUserId(userId);
+    if (status) {
+      unsuspendUser(userId);
+    } else {
+      suspendUser(userId);
+    }
   };
 
   const handleDelete = (userId: string) => {
-    setDeletingUser(true);
-    setUserId(userId);
+    deleteUser(userId);
   };
 
   const handleCreate = () => {
     setCreatingUser(false);
-    setCreate(true);
+    createUser();
   };
 
   const handleStartEdit = (user: any) => {
@@ -235,7 +201,7 @@ export const UserManagementPage = () => {
   };
 
   const handleEdit = () => {
-    setEdit(true);
+    editUser();
   };
 
   return (
@@ -268,7 +234,14 @@ export const UserManagementPage = () => {
           <AddCircleIcon />
         </Button>
         <DefaultTable
-          headers={["Name", "Email", "Role", "Account Status", "Last Login"]}
+          headers={[
+            "Name",
+            "Email",
+            "Role",
+            "Account Status",
+            "Last Login",
+            "",
+          ]}
           data={tableData.map((user: any) => (
             <TableRow key={user.id}>
               <TableCell>{user.name}</TableCell>

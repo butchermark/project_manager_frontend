@@ -1,11 +1,13 @@
 import { ThemeProvider } from "@emotion/react";
 import {
   Button,
+  Container,
   Menu,
   MenuItem,
   TableCell,
   TableRow,
   Tooltip,
+  Typography,
   createTheme,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -17,10 +19,12 @@ import axios from "axios";
 import { EditTaskPanel } from "../UI/EditTaskPanel";
 import EditIcon from "@mui/icons-material/Edit";
 import { CreateTaskPanel } from "../UI/CreateTaskPanel";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import UnarchiveIcon from "@mui/icons-material/Unarchive";
 
 export const TaskManagementPage = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [tableData, setTableData] = useState([]);
+  const [tableData, setTableData] = useState<any[]>([]);
   const [editingTask, setEditingTask] = useState(false);
   const [taskId, setTaskId] = useState("");
   const [taskName, setTaskName] = useState("");
@@ -29,16 +33,12 @@ export const TaskManagementPage = () => {
   const [originalTaskName, setOriginalTaskName] = useState("");
   const [originalTaskDescription, setOriginalTaskDescription] = useState("");
   const [originalTaskStatus, setOriginalTaskStatus] = useState("");
-  const [deletingTask, setDeletingTask] = useState(false);
-  const [edit, setEdit] = useState(false);
-  const [addingUserToTask, setAddingUserToTask] = useState(false);
-  const [removingUserFromTask, setRemovingUserFromTask] = useState(false);
-  const [userId, setUserId] = useState("");
   const [users, setUsers] = useState([]);
-  const [create, setCreate] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
   const [projectId, setProjectId] = useState("");
-  const [projectName, setProjectName] = useState("");
+  const [isReload, setIsReload] = useState(true);
+  const [projectButtonText, setProjectButtonText] = useState(false);
+  const [showArchived, setShowArchived] = useState(true);
   const open = Boolean(anchorEl);
 
   const theme = createTheme({
@@ -69,15 +69,25 @@ export const TaskManagementPage = () => {
               if (task.project === null) {
                 task.project = { name: "No project" };
               }
+              if (showArchived) {
+                const archivedTasks = res.data.filter(
+                  (task: any) => !task.archived
+                );
+
+                setTableData(archivedTasks);
+              } else {
+                setTableData(res.data);
+              }
             });
-            setTableData(res.data);
+            setIsReload(false);
           });
       } catch (err) {
         console.log(err);
       }
     };
     fetchTasks();
-  }, [removingUserFromTask, addingUserToTask]);
+    setProjectButtonText(true);
+  }, [isReload, showArchived]);
 
   const createTask = useCallback(async () => {
     try {
@@ -96,23 +106,19 @@ export const TaskManagementPage = () => {
           }
         )
         .then((res) => {
-          console.log(res.data);
-          res.data.forEach((task: any) => {
-            if (task.user === null) {
-              task.user = { name: "No user" };
-            }
-            if (task.project === null) {
-              task.project = { name: "No project" };
-            }
-          });
-          setTableData(res.data);
+          if (res.data.user === null) {
+            res.data.user = { name: "No user" };
+          }
+          if (res.data.project === null) {
+            res.data.project = { name: "No project" };
+          }
+          setIsReload(true);
         });
     } catch (err) {
       console.log(err);
     }
     setCreatingTask(false);
-    setCreate(false);
-  }, [create]);
+  }, [taskName, taskDescription, taskStatus, projectId]);
 
   const editTask = useCallback(async () => {
     try {
@@ -131,24 +137,15 @@ export const TaskManagementPage = () => {
           }
         )
         .then((res) => {
-          res.data.forEach((task: any) => {
-            if (task.user === null) {
-              task.user = { name: "No user" };
-            }
-            if (task.project === null) {
-              task.project = { name: "No project" };
-            }
-          });
-          setTableData(res.data);
+          setIsReload(true);
         });
     } catch (err) {
       console.log(err);
     }
     setEditingTask(false);
-    setEdit(false);
-  }, [edit]);
+  }, [taskId, taskName, taskDescription, taskStatus]);
 
-  const deleteTask = useCallback(async () => {
+  const deleteTask = useCallback(async (taskId: string) => {
     try {
       await axios
         .delete(`http://localhost:3000/task/${taskId}`, {
@@ -157,51 +154,91 @@ export const TaskManagementPage = () => {
           },
         })
         .then((res) => {
-          res.data.forEach((task: any) => {
-            if (task.user === null) {
-              task.user = { name: "No user" };
-            }
-            if (task.project === null) {
-              task.project = { name: "No project" };
-            }
-          });
-          setTableData(res.data);
+          setIsReload(true);
         });
     } catch (err) {
       console.log(err);
     }
-    setDeletingTask(false);
-  }, [deletingTask]);
+  }, []);
 
-  const addUserToTask = useCallback(async () => {
+  const addUserToTask = useCallback(
+    async (userId: string) => {
+      try {
+        await axios
+          .post(
+            `http://localhost:3000/user/${taskId}/task`,
+            { id: userId },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            }
+          )
+          .then((res) => {
+            setIsReload(true);
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [taskId]
+  );
+
+  const removeUserFromTask = useCallback(async (taskId: string) => {
     try {
-      await axios.post(
-        `http://localhost:3000/user/${taskId}/task`,
-        { id: userId },
-        {
+      await axios
+        .delete(`http://localhost:3000/user/${taskId}/task`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-        }
-      );
+        })
+        .then((res) => {
+          setIsReload(true);
+        });
     } catch (err) {
       console.log(err);
     }
-    setAddingUserToTask(false);
-  }, [userId]);
+  }, []);
 
-  const removeUserFromTask = useCallback(async () => {
+  const archiveTask = useCallback(async (taskId: string) => {
     try {
-      await axios.delete(`http://localhost:3000/user/${taskId}/task`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
+      await axios
+        .put(
+          `http://localhost:3000/task/${taskId}/archiveTask`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        )
+        .then((res) => {
+          setIsReload(true);
+        });
     } catch (err) {
       console.log(err);
     }
-    setRemovingUserFromTask(false);
-  }, [removingUserFromTask]);
+  }, []);
+
+  const unarchiveTask = useCallback(async (taskId: string) => {
+    try {
+      await axios
+        .put(
+          `http://localhost:3000/task/${taskId}/unarchiveTask`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        )
+        .then((res) => {
+          setIsReload(true);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
 
   const getAllUsers = useCallback(async () => {
     try {
@@ -219,29 +256,6 @@ export const TaskManagementPage = () => {
     }
   }, []);
 
-  useEffect(() => {
-    switch (true) {
-      case edit:
-        editTask();
-        break;
-      case deletingTask:
-        deleteTask();
-        break;
-      case addingUserToTask:
-        addUserToTask();
-        break;
-      case removingUserFromTask:
-        removeUserFromTask();
-        break;
-      case create:
-        createTask();
-        break;
-      default:
-        getAllUsers();
-        break;
-    }
-  }, [create, edit, deletingTask, addingUserToTask, removingUserFromTask]);
-
   const handleStartEdit = (task: any) => {
     setTaskId(task.id);
     setOriginalTaskName(task.name);
@@ -250,39 +264,34 @@ export const TaskManagementPage = () => {
     setEditingTask(true);
   };
   const handleEdit = () => {
-    setEdit(true);
+    editTask();
   };
 
-  const handleDelete = (taskId: string) => {
-    setDeletingTask(true);
-    setTaskId(taskId);
-  };
-
-  const handleAddingUserToTask = (userId: string, taskId: string) => {
-    setTaskId(taskId);
-    setUserId(userId);
-    setAddingUserToTask(true);
+  const handleAddingUserToTask = (userId: string) => {
+    addUserToTask(userId);
     setAnchorEl(null);
   };
-  const handleRemoveUserFromTask = (taskId: string) => {
-    setRemovingUserFromTask(true);
-    setTaskId(taskId);
-  };
 
-  const handleClickOnDropDown = (event: any) => {
+  const handleClickOnDropDown = (event: any, taskId: string) => {
     setAnchorEl(event.currentTarget);
+    setTaskId(taskId);
+    getAllUsers();
   };
 
-  const handleStartCreate = () => {
-    setCreatingTask(true);
+  const handleShowArchivedTasks = () => {
+    if (showArchived) {
+      setShowArchived(false);
+    } else {
+      setShowArchived(true);
+    }
   };
 
-  const handleCreate = () => {
-    setCreate(true);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleArchiveTask = (taskId: string, taskIsArchived: boolean) => {
+    if (!taskIsArchived) {
+      archiveTask(taskId);
+    } else {
+      unarchiveTask(taskId);
+    }
   };
 
   return (
@@ -301,20 +310,40 @@ export const TaskManagementPage = () => {
           close={() => setCreatingTask(false)}
           status={creatingTask}
           method={"Create task"}
-          submit={handleCreate}
+          submit={() => createTask()}
           taskname={(e: any) => setTaskName(e.target.value)}
           taskdescription={(e: any) => setTaskDescription(e.target.value)}
           taskstatus={(e: any) => setTaskStatus(e.target.value)}
           projectId={setProjectId}
-          projectName={setProjectName}
+          projectbuttontext={projectButtonText}
+          changeprojectbuttontext={setProjectButtonText}
         ></CreateTaskPanel>
         <Navbar />
         <Button
           variant="contained"
           color="success"
-          onClick={() => handleStartCreate()}
+          onClick={() => setCreatingTask(true)}
         >
-          <AddCircleIcon />
+          <Container>
+            <Typography>Add New Task</Typography> <AddCircleIcon />
+          </Container>
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => handleShowArchivedTasks()}
+        >
+          {showArchived ? (
+            <Container>
+              <Typography>Show All</Typography>
+              <UnarchiveIcon />
+            </Container>
+          ) : (
+            <Container>
+              <Typography>Hide Archived</Typography>
+              <ArchiveIcon />
+            </Container>
+          )}
         </Button>
         <DefaultTable
           headers={[
@@ -324,7 +353,7 @@ export const TaskManagementPage = () => {
             "User",
             "Project",
             "Archived",
-            " ",
+            "",
           ]}
           data={tableData.map((task: any) => (
             <TableRow key={task.id}>
@@ -343,7 +372,7 @@ export const TaskManagementPage = () => {
                       <Button
                         id={task.id}
                         variant="contained"
-                        onClick={(e) => handleClickOnDropDown(e)}
+                        onClick={(e) => handleClickOnDropDown(e, task.id)}
                       >
                         Add User
                       </Button>
@@ -352,14 +381,12 @@ export const TaskManagementPage = () => {
                       anchorEl={anchorEl}
                       id="users"
                       open={open}
-                      onClose={handleClose}
+                      onClose={() => setAnchorEl(null)}
                     >
                       {users.map((user: any) => (
                         <MenuItem
                           key={user.id}
-                          onClick={() =>
-                            handleAddingUserToTask(user.id, task.id)
-                          }
+                          onClick={() => handleAddingUserToTask(user.id)}
                         >
                           {user.name}
                         </MenuItem>
@@ -369,7 +396,7 @@ export const TaskManagementPage = () => {
                 )}
                 {task.user.name !== "No user" && (
                   <Button
-                    onClick={() => handleRemoveUserFromTask(task.id)}
+                    onClick={() => removeUserFromTask(task.id)}
                     variant="contained"
                   >
                     Remove User
@@ -383,10 +410,17 @@ export const TaskManagementPage = () => {
                   <EditIcon />
                 </Button>
                 <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => handleArchiveTask(task.id, task.archived)}
+                >
+                  {task.archived ? <UnarchiveIcon /> : <ArchiveIcon />}
+                </Button>
+                <Button
                   color="error"
                   variant="outlined"
                   id={task.id}
-                  onClick={() => handleDelete(task.id)}
+                  onClick={() => deleteTask(task.id)}
                 >
                   <DeleteIcon />
                 </Button>

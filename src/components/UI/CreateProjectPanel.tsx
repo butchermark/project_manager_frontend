@@ -1,16 +1,19 @@
 import {
-  Modal,
   Container,
-  Box,
   Typography,
   TextField,
+  Modal,
+  Box,
   Button,
+  Menu,
+  MenuItem,
+  Tooltip,
 } from "@mui/material";
+import AddCircleOutLineIcon from "@mui/icons-material/AddCircle";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-export const EditTaskPanel = (props: any) => {
-  const handleSubmit = () => {
-    props.submit();
-  };
+export const CreateProjectPanel = (props: any) => {
   return (
     <Modal
       sx={{ display: "flex", alignItems: "center" }}
@@ -22,7 +25,7 @@ export const EditTaskPanel = (props: any) => {
           display: "flex",
           flexDirection: "column",
           maxWidth: 400,
-          maxHeight: 530,
+          maxHeight: 500,
           backgroundColor: "white",
           padding: 3,
           width: "100%",
@@ -45,28 +48,19 @@ export const EditTaskPanel = (props: any) => {
           }}
         >
           <Typography>Name</Typography>
-          <TextField
-            sx={{ height: "30px", marginBottom: 3 }}
-            onChange={(e) => props.taskname(e)}
-          />
+          <TextField onChange={(e) => props.projectname(e)} />
           <Typography>Description</Typography>
-          <TextField
-            sx={{ height: "30px", marginBottom: 3 }}
-            onChange={(e) => props.taskdescription(e)}
-          />
+          <TextField onChange={(e) => props.projectdescription(e)} />
           <Typography>Status</Typography>
-          <TextField
-            sx={{ height: "30px", marginBottom: 3 }}
-            onChange={(e) => props.taskstatus(e)}
-          />
+          <TextField onChange={(e) => props.projectstatus(e)} />
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
-              onClick={handleSubmit}
               color="success"
               variant="contained"
               sx={{ width: 10, marginTop: 2 }}
+              onClick={props.submit}
             >
-              Edit
+              <AddCircleOutLineIcon />
             </Button>
           </Box>
         </Box>

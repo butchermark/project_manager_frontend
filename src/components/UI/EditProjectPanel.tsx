@@ -1,60 +1,55 @@
 import {
+  Modal,
   Container,
+  Box,
   Typography,
   TextField,
-  Modal,
-  Box,
   Button,
   Menu,
   MenuItem,
   Tooltip,
 } from "@mui/material";
-import AddCircleOutLineIcon from "@mui/icons-material/AddCircle";
-import React, { useEffect, useState } from "react";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
 
-export const CreateTaskPanel = (props: any) => {
+export const EditProjectPanel = (props: any) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [admins, setAdmins] = useState([]);
+  const [addAdminButtonText, setAddAdminButtonText] = useState("Add admin");
   const open = Boolean(anchorEl);
-  const [projects, setProjects] = useState([]);
-  const [addProjectButtonText, setAddProjectButtonText] =
-    useState("Add to project");
-
   useEffect(() => {
-    const getAllProjects = async () => {
+    const gettAllAdmins = async () => {
       try {
         await axios
-          .get("http://localhost:3000/project/", {
+          .get("http://localhost:3000/user/admins/", {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           })
           .then((res) => {
-            setProjects(res.data);
+            setAdmins(res.data);
           });
       } catch (e) {
         console.log(e);
       }
     };
-    getAllProjects();
+    gettAllAdmins();
   }, []);
 
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const handleSelectProject = (projectId: string, projectName: string) => {
-    props.projectId(projectId);
-    setAddProjectButtonText(projectName);
-    setAnchorEl(null);
-  };
   const handleClickOnDropDown = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
-
+  const handleSelectAdmin = (admin: any, adminName: string) => {
+    props.projectmanager(admin);
+    setAddAdminButtonText(adminName);
+    setAnchorEl(null);
+  };
   const handleSubmit = () => {
     props.submit();
-    props.changeprojectbuttontext(false);
+    props.changeadminbuttontext(false);
   };
 
   return (
@@ -68,7 +63,7 @@ export const CreateTaskPanel = (props: any) => {
           display: "flex",
           flexDirection: "column",
           maxWidth: 400,
-          maxHeight: 500,
+          maxHeight: 530,
           backgroundColor: "white",
           padding: 3,
           width: "100%",
@@ -91,18 +86,29 @@ export const CreateTaskPanel = (props: any) => {
           }}
         >
           <Typography>Name</Typography>
-          <TextField onChange={(e) => props.taskname(e)} />
+          <TextField
+            sx={{ height: "30px", marginBottom: 3 }}
+            onChange={(e) => props.projectname(e)}
+          />
           <Typography>Description</Typography>
-          <TextField onChange={(e) => props.taskdescription(e)} />
+          <TextField
+            sx={{ height: "30px", marginBottom: 3 }}
+            onChange={(e) => props.projectdescription(e)}
+          />
           <Typography>Status</Typography>
-          <TextField onChange={(e) => props.taskstatus(e)} />
-          <Typography>Project</Typography>
+          <TextField
+            sx={{ height: "30px", marginBottom: 3 }}
+            onChange={(e) => props.projectstatus(e)}
+          />
+          <Typography>Admin</Typography>
           <Tooltip title="Add to project">
             <Button
               variant="contained"
               onClick={(e) => handleClickOnDropDown(e)}
             >
-              {addProjectButtonText}
+              {props.changeadminbuttontext === false
+                ? "Add admin"
+                : addAdminButtonText}
             </Button>
           </Tooltip>
           <Menu
@@ -111,24 +117,24 @@ export const CreateTaskPanel = (props: any) => {
             open={open}
             onClose={handleClose}
           >
-            {projects.map((project: any) => (
+            {admins.map((admin: any) => (
               <MenuItem
-                key={project.id}
-                onClick={() => handleSelectProject(project.id, project.name)}
+                key={admin.id}
+                onClick={() => handleSelectAdmin(admin, admin.name)}
               >
-                {project.name}
+                {admin.name}
               </MenuItem>
             ))}
           </Menu>
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
+              onClick={handleSubmit}
               color="success"
               variant="contained"
               sx={{ width: 10, marginTop: 2 }}
-              onClick={handleSubmit}
-              disabled={addProjectButtonText === "Add to project"}
+              disabled={addAdminButtonText === "Add admin"}
             >
-              <AddCircleOutLineIcon />
+              Edit
             </Button>
           </Box>
         </Box>

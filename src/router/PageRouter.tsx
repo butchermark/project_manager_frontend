@@ -6,6 +6,7 @@ import ProjectManagerContext from "../context/ProjectManagerContext";
 import { UserManagementPage } from "../components/pages/UserManagementPage";
 import { ProjectManagementPage } from "../components/pages/ProjectManagementPage";
 import { TaskManagementPage } from "../components/pages/TaskManagementPage";
+import { ProjectPage } from "../components/pages/ProjectPage";
 
 export const PageRouter = () => {
   const { accessToken } = useContext(ProjectManagerContext);
@@ -22,6 +23,8 @@ export const PageRouter = () => {
           <Route path="/usermanagement" element={<UserManagementPage />} />
           <Route path="/dashboard" element={<DashBoardPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/project/:projectid" element={<ProjectPage />} />
+          <Route path="/project/:projectid/*" element={<ProjectPage />} />
           <Route path="/" element={<LoginPage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
@@ -32,6 +35,8 @@ export const PageRouter = () => {
           <Route path="/usermanagement" element={<Navigate to="/" />} />
           <Route path="/dashboard" element={<Navigate to="/" />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/project/:projectid" element={<Navigate to="/" />} />
+          <Route path="/project/:projectid/*" element={<Navigate to="/" />} />
           <Route path="/" element={<LoginPage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

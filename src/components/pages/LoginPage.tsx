@@ -124,7 +124,7 @@ export const LoginPage = () => {
           />
           <Typography sx={{ marginTop: 2 }}>Password</Typography>
           <TextField
-            type="text"
+            type="password"
             className="login-input-field"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
