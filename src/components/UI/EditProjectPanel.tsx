@@ -69,6 +69,7 @@ export const EditProjectPanel = (props: any) => {
           width: "100%",
           position: "relative",
         }}
+        maxWidth={false}
       >
         <Box
           sx={{

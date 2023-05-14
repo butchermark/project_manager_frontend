@@ -55,7 +55,7 @@ export const TaskManagementPage = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await axios
+        await axios
           .get("http://localhost:3000/task/allTasks", {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -319,115 +319,131 @@ export const TaskManagementPage = () => {
           changeprojectbuttontext={setProjectButtonText}
         ></CreateTaskPanel>
         <Navbar />
-        <Button
-          variant="contained"
-          color="success"
-          onClick={() => setCreatingTask(true)}
-        >
-          <Container>
-            <Typography>Add New Task</Typography> <AddCircleIcon />
-          </Container>
-        </Button>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => handleShowArchivedTasks()}
-        >
-          {showArchived ? (
-            <Container>
-              <Typography>Show All</Typography>
-              <UnarchiveIcon />
-            </Container>
-          ) : (
-            <Container>
-              <Typography>Hide Archived</Typography>
-              <ArchiveIcon />
-            </Container>
-          )}
-        </Button>
-        <DefaultTable
-          headers={[
-            "Name",
-            "Description",
-            "Status",
-            "User",
-            "Project",
-            "Archived",
-            "",
-          ]}
-          data={tableData.map((task: any) => (
-            <TableRow key={task.id}>
-              <TableCell>{task.name}</TableCell>
-              <TableCell>{task.description}</TableCell>
-              <TableCell>{task.status}</TableCell>
-              <TableCell>{task.user.name}</TableCell>
-              <TableCell>{task.project.name}</TableCell>
-              <TableCell>
-                {task.archived ? "Archived" : "Unarchived "}
-              </TableCell>
-              <TableCell sx={{ display: "flex", flexDirection: "row" }}>
-                {task.user.name === "No user" && (
-                  <div>
-                    <Tooltip title="Add User">
-                      <Button
-                        id={task.id}
-                        variant="contained"
-                        onClick={(e) => handleClickOnDropDown(e, task.id)}
-                      >
-                        Add User
-                      </Button>
-                    </Tooltip>
-                    <Menu
-                      anchorEl={anchorEl}
-                      id="users"
-                      open={open}
-                      onClose={() => setAnchorEl(null)}
-                    >
-                      {users.map((user: any) => (
-                        <MenuItem
-                          key={user.id}
-                          onClick={() => handleAddingUserToTask(user.id)}
-                        >
-                          {user.name}
-                        </MenuItem>
-                      ))}
-                    </Menu>
-                  </div>
-                )}
-                {task.user.name !== "No user" && (
-                  <Button
-                    onClick={() => removeUserFromTask(task.id)}
-                    variant="contained"
-                  >
-                    Remove User
-                  </Button>
-                )}
+        <Container sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+          <Typography color="primary" variant="h4">
+            Task Management
+          </Typography>
+        </Container>
 
-                <Button
-                  variant="contained"
-                  onClick={() => handleStartEdit(task)}
+        <Container sx={{ mt: 5 }}>
+          <Container sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              sx={{ marginRight: 2, padding: 0 }}
+              variant="contained"
+              color="success"
+              onClick={() => setCreatingTask(true)}
+            >
+              <Container sx={{ padding: 0 }}>
+                <Typography>Add New Task</Typography> <AddCircleIcon />
+              </Container>
+            </Button>
+            <Button
+              sx={{ padding: 0 }}
+              variant="outlined"
+              color="primary"
+              onClick={() => handleShowArchivedTasks()}
+            >
+              {showArchived ? (
+                <Container sx={{ padding: 0 }}>
+                  <Typography>Show All</Typography>
+                  <UnarchiveIcon />
+                </Container>
+              ) : (
+                <Container>
+                  <Typography>Hide Archived</Typography>
+                  <ArchiveIcon />
+                </Container>
+              )}
+            </Button>
+          </Container>
+          <DefaultTable
+            headers={[
+              "Name",
+              "Description",
+              "Status",
+              "User",
+              "Project",
+              "",
+              "",
+            ]}
+            data={tableData.map((task: any) => (
+              <TableRow key={task.id}>
+                <TableCell>{task.name}</TableCell>
+                <TableCell>{task.description}</TableCell>
+                <TableCell>{task.status}</TableCell>
+                <TableCell>{task.user.name}</TableCell>
+                <TableCell>{task.project.name}</TableCell>
+                <TableCell>
+                  {task.user.name === "No user" && (
+                    <div>
+                      <Tooltip title="Add User">
+                        <Button
+                          id={task.id}
+                          variant="contained"
+                          onClick={(e) => handleClickOnDropDown(e, task.id)}
+                        >
+                          Add User
+                        </Button>
+                      </Tooltip>
+                      <Menu
+                        anchorEl={anchorEl}
+                        id="users"
+                        open={open}
+                        onClose={() => setAnchorEl(null)}
+                      >
+                        {users.map((user: any) => (
+                          <MenuItem
+                            key={user.id}
+                            onClick={() => handleAddingUserToTask(user.id)}
+                          >
+                            {user.name}
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </div>
+                  )}
+                  {task.user.name !== "No user" && (
+                    <Button
+                      onClick={() => removeUserFromTask(task.id)}
+                      variant="contained"
+                    >
+                      Remove User
+                    </Button>
+                  )}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
                 >
-                  <EditIcon />
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => handleArchiveTask(task.id, task.archived)}
-                >
-                  {task.archived ? <UnarchiveIcon /> : <ArchiveIcon />}
-                </Button>
-                <Button
-                  color="error"
-                  variant="outlined"
-                  id={task.id}
-                  onClick={() => deleteTask(task.id)}
-                >
-                  <DeleteIcon />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        ></DefaultTable>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleStartEdit(task)}
+                  >
+                    <EditIcon />
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => handleArchiveTask(task.id, task.archived)}
+                  >
+                    {task.archived ? <UnarchiveIcon /> : <ArchiveIcon />}
+                  </Button>
+                  <Button
+                    color="error"
+                    variant="outlined"
+                    id={task.id}
+                    onClick={() => deleteTask(task.id)}
+                  >
+                    <DeleteIcon />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          ></DefaultTable>
+        </Container>
       </ThemeProvider>
     </React.Fragment>
   );

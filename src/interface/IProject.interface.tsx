@@ -9,5 +9,5 @@ export interface IProject {
   status?: string;
   users?: IUser[];
   tasks?: ITask[];
-  manager?: IUser;
+  user?: IUser;
 }

@@ -13,6 +13,7 @@ import {
   MenuItem,
   ListItemIcon,
   createTheme,
+  Container,
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { ReactComponent as Logo } from "../UI/logo/logo.svg";
@@ -77,6 +78,7 @@ export const Navbar = () => {
             <Toolbar>
               <Logo />
               <Typography
+                display={"flex"}
                 paddingLeft={2}
                 variant="h4"
                 component="div"
@@ -85,11 +87,12 @@ export const Navbar = () => {
               >
                 Project Manager
               </Typography>
-              <Stack direction="row" spacing={2}>
+              <Stack sx={{ display: "flex" }} direction="row" spacing={2}>
                 <Button
                   color="secondary"
                   sx={{
                     border: 0.5,
+                    display: "flex",
                   }}
                   onClick={(e) => handleSiteSwitch(e)}
                 >
@@ -99,6 +102,7 @@ export const Navbar = () => {
                   color="secondary"
                   sx={{
                     border: 0.5,
+                    display: "flex",
                   }}
                   onClick={(e) => handleSiteSwitch(e)}
                 >
@@ -108,13 +112,14 @@ export const Navbar = () => {
                   color="secondary"
                   sx={{
                     border: 0.5,
+                    display: "flex",
                   }}
                   onClick={(e) => handleSiteSwitch(e)}
                 >
                   Project Management
                 </Button>
               </Stack>
-              <Tooltip title="Account">
+              <Tooltip sx={{ display: "flex" }} title="Account">
                 <IconButton
                   onClick={handleClick}
                   size="medium"
@@ -136,6 +141,7 @@ export const Navbar = () => {
                 </IconButton>
               </Tooltip>
               <Menu
+                sx={{ display: "flex" }}
                 anchorEl={anchorEl}
                 id="account-menu"
                 open={open}
@@ -153,7 +159,7 @@ export const Navbar = () => {
         </ThemeProvider>
       ) : (
         <ThemeProvider theme={theme}>
-          <AppBar position="static">
+          <AppBar sx={{ display: "flex" }} position="static">
             <Toolbar>
               <Logo />
               <Typography

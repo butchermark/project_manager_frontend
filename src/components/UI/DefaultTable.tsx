@@ -1,19 +1,39 @@
 import {
+  Container,
   Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TableHead,
-  TablePagination,
   TableRow,
 } from "@mui/material";
 
 export const DefaultTable = ({ headers, data }: any) => {
   return (
-    <Paper>
-      <TableContainer component={Paper}>
-        <Table aria-label="simple table">
+    <Container
+      sx={{
+        display: "flex",
+        width: "100%",
+        overflow: "hidden",
+        marginTop: "5px",
+      }}
+    >
+      <TableContainer
+        sx={{
+          display: "flex",
+          marginBottom: "50px",
+        }}
+        component={Paper}
+      >
+        <Table
+          sx={{
+            width: "100%",
+            overflow: "hidden",
+          }}
+          aria-label="simple table"
+        >
           <TableHead>
             <TableRow>
               {headers.map((header: any, index: any) => (
@@ -24,17 +44,6 @@ export const DefaultTable = ({ headers, data }: any) => {
           <TableBody>{data}</TableBody>
         </Table>
       </TableContainer>
-    </Paper>
+    </Container>
   );
 };
-/*
-<TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-*/

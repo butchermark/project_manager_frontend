@@ -74,6 +74,7 @@ export const CreateTaskPanel = (props: any) => {
           width: "100%",
           position: "relative",
         }}
+        maxWidth={false}
       >
         <Box
           sx={{

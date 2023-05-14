@@ -9,6 +9,8 @@ import {
   Button,
   createTheme,
   ThemeProvider,
+  Container,
+  Typography,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -224,62 +226,86 @@ export const UserManagementPage = () => {
           userpassword={(e: any) => setCreateUserPassword(e.target.value)}
           submit={handleCreate}
         ></CreateUserPanel>
-
         <Navbar />
-        <Button
-          variant="contained"
-          color="success"
-          onClick={() => setCreatingUser(true)}
-        >
-          <AddCircleIcon />
-        </Button>
-        <DefaultTable
-          headers={[
-            "Name",
-            "Email",
-            "Role",
-            "Account Status",
-            "Last Login",
-            "",
-          ]}
-          data={tableData.map((user: any) => (
-            <TableRow key={user.id}>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.isAdmin ? "Admin" : "User"}</TableCell>
-              <TableCell>{user.isSuspended ? "Suspended" : "Active"}</TableCell>
-              <TableCell>
-                {user.lastLogin === "2000-01-01"
-                  ? "Not logged yet"
-                  : user.lastLogin}
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="contained"
-                  onClick={() => handleStartEdit(user)}
+        <Container sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+          <Typography color="primary" variant="h4">
+            User Management
+          </Typography>
+        </Container>
+        <Container sx={{ mt: 5 }}>
+          <Container sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              sx={{ padding: 0 }}
+              variant="contained"
+              color="success"
+              onClick={() => setCreatingUser(true)}
+            >
+              <Container sx={{ padding: 0 }}>
+                <Typography>Add New User</Typography>
+                <AddCircleIcon />
+              </Container>
+            </Button>
+          </Container>
+          <DefaultTable
+            headers={[
+              "Name",
+              "Email",
+              "Role",
+              "Account Status",
+              "Last Login",
+              "",
+            ]}
+            data={tableData.map((user: any) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.isAdmin ? "Admin" : "User"}</TableCell>
+                <TableCell>
+                  {user.isSuspended ? "Suspended" : "Active"}
+                </TableCell>
+                <TableCell>
+                  {user.lastLogin === "2000-01-01"
+                    ? "Not logged yet"
+                    : user.lastLogin}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
                 >
-                  <EditIcon />
-                </Button>
-                <Button
-                  variant="contained"
-                  id={user.id}
-                  onClick={() => handleSuspend(user.id, user.isSuspended)}
-                  title={user.isSuspended ? "Unsuspend" : "Suspend"}
-                >
-                  {user.isSuspended ? <PowerSettingsNewIcon /> : <BlockIcon />}
-                </Button>
-                <Button
-                  color="error"
-                  variant="outlined"
-                  id={user.id}
-                  onClick={() => handleDelete(user.id)}
-                >
-                  <DeleteIcon />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        ></DefaultTable>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleStartEdit(user)}
+                  >
+                    <EditIcon />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    id={user.id}
+                    onClick={() => handleSuspend(user.id, user.isSuspended)}
+                    title={user.isSuspended ? "Unsuspend" : "Suspend"}
+                  >
+                    {user.isSuspended ? (
+                      <PowerSettingsNewIcon />
+                    ) : (
+                      <BlockIcon />
+                    )}
+                  </Button>
+                  <Button
+                    color="error"
+                    variant="outlined"
+                    id={user.id}
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    <DeleteIcon />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          ></DefaultTable>
+        </Container>
       </ThemeProvider>
     </React.Fragment>
   );

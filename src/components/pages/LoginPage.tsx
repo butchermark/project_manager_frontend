@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import ProjectManagerContext from "../../context/ProjectManagerContext";
 import LoginIcon from "@mui/icons-material/Login";
@@ -7,11 +7,13 @@ import {
   TextField,
   ThemeProvider,
   Typography,
+  colors,
   createTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ReactComponent as Logo } from "../UI/logo/logoBig.svg";
+import { CreateUserPanel } from "../UI/CreateUserPanel";
 
 export const LoginPage = () => {
   const { setAccessToken, setLoading, username, setUsername } = useContext(
@@ -19,6 +21,11 @@ export const LoginPage = () => {
   );
   const [password, setPassword] = useState("");
   const [isSubmit, setIsSubmit] = useState(false);
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [userName, setCreateUserName] = useState("");
+  const [userEmail, setCreateUserEmail] = useState("");
+  const [userPassword, setCreateUserPassword] = useState("");
+  const [isReload, setIsReload] = useState(true);
   let navigate = useNavigate();
   const theme = createTheme({
     palette: {
@@ -35,7 +42,6 @@ export const LoginPage = () => {
     if (isSubmit) {
       const getUser = async () => {
         try {
-          //setLoading(true);
           await axios
             .post("http://localhost:3000/auth/signin", {
               name: username,
@@ -67,10 +73,43 @@ export const LoginPage = () => {
       };
       getUser();
     }
-  }, [isSubmit]);
+  }, [isSubmit, isReload]);
+
+  const registration = useCallback(async () => {
+    try {
+      await axios
+        .post(
+          "http://localhost:3000/user/registration",
+          {
+            name: userName,
+            email: userEmail,
+            password: userPassword,
+            isAdmin: false,
+            isSuspended: false,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        )
+        .then((res) => {
+          setIsReload(true);
+          navigate("/login");
+        });
+    } catch (err) {
+      console.log(err);
+    }
+    setCreatingUser(false);
+  }, [userName, userEmail, userPassword]);
 
   const handleSubmit = () => {
     setIsSubmit(true);
+  };
+
+  const handleCreate = () => {
+    setCreatingUser(false);
+    registration();
   };
 
   return (
@@ -84,6 +123,15 @@ export const LoginPage = () => {
       }}
     >
       <ThemeProvider theme={theme}>
+        <CreateUserPanel
+          close={() => setCreatingUser(false)}
+          status={creatingUser}
+          method={"Create new User"}
+          username={(e: any) => setCreateUserName(e.target.value)}
+          useremail={(e: any) => setCreateUserEmail(e.target.value)}
+          userpassword={(e: any) => setCreateUserPassword(e.target.value)}
+          submit={handleCreate}
+        ></CreateUserPanel>
         <Container
           sx={{
             display: "flex",
@@ -115,14 +163,16 @@ export const LoginPage = () => {
             flexDirection: "column",
           }}
         >
-          <Typography>Name</Typography>
+          <Typography color="primary">Name</Typography>
           <TextField
             type="text"
             className="login-input-field"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-          <Typography sx={{ marginTop: 2 }}>Password</Typography>
+          <Typography color="primary" sx={{ marginTop: 2 }}>
+            Password
+          </Typography>
           <TextField
             type="password"
             className="login-input-field"
@@ -135,7 +185,7 @@ export const LoginPage = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            flexDirection: "column",
+            flexDirection: "row",
           }}
         >
           <Button
@@ -144,9 +194,12 @@ export const LoginPage = () => {
             disabled={isSubmit}
             onClick={handleSubmit}
             variant="contained"
-            sx={{ marginTop: 2 }}
+            sx={{ marginTop: 2, marginBottom: 2, marginRight: 2 }}
           >
             <LoginIcon />
+          </Button>
+          <Button variant="outlined" onClick={() => setCreatingUser(true)}>
+            <Typography>Register</Typography>
           </Button>
         </Container>
       </ThemeProvider>

@@ -4,33 +4,58 @@ import { DefaultTable } from "../UI/DefaultTable";
 import axios from "axios";
 import {
   Button,
+  Container,
   Menu,
   MenuItem,
   TableCell,
   TableRow,
   Tooltip,
+  Typography,
+  createTheme,
 } from "@mui/material";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import UnarchiveIcon from "@mui/icons-material/Unarchive";
+import { ThemeProvider } from "@emotion/react";
 
 export const DashBoardPage = () => {
   const [taskStatus, setTaskStatus] = useState("");
   const [taskId, setTaskId] = useState("");
   const [tableData, setTableData] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [showArchived, setShowArchived] = useState(true);
   const userId = JSON.parse(localStorage.getItem("user") || "{}").id;
   const open = Boolean(anchorEl);
+
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#0e055f",
+      },
+      secondary: {
+        main: "#ffffff",
+      },
+    },
+  });
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:3000/user/${userId}/tasks`,
-          {
+        await axios
+          .get(`http://localhost:3000/user/${userId}/tasks`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
-          }
-        );
-        setTableData(res.data);
+          })
+          .then((res) => {
+            if (showArchived) {
+              const archivedTasks = res.data.filter(
+                (task: any) => !task.archived
+              );
+              setTableData(archivedTasks);
+            } else {
+              setTableData(res.data);
+            }
+          });
       } catch (err) {
         console.log(err);
       }
@@ -59,7 +84,7 @@ export const DashBoardPage = () => {
       };
       updateTask();
     }
-  }, [taskStatus, taskId, userId]);
+  }, [taskStatus, showArchived]);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -74,35 +99,73 @@ export const DashBoardPage = () => {
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const handleShowArchivedTasks = () => {
+    if (showArchived) {
+      setShowArchived(false);
+    } else {
+      setShowArchived(true);
+    }
+  };
+
   return (
     <React.Fragment>
-      <Navbar />
-      <DefaultTable
-        headers={["Name", "Description", "Status", "Archived", " "]}
-        data={tableData.map((task: any) => (
-          <TableRow key={task.id}>
-            <TableCell>{task.name}</TableCell>
-            <TableCell>{task.description}</TableCell>
-            <TableCell>{task.status}</TableCell>
-            <TableCell>{task.archived ? "Archived" : "Unarchived "}</TableCell>
-            <TableCell>
-              <Tooltip title="Update">
-                <Button id={task.id} onClick={(e) => handleClick(e)}>
-                  Update
-                </Button>
-              </Tooltip>
-              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
-                  In Progress
-                </MenuItem>
-                <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
-                  Done
-                </MenuItem>
-              </Menu>
-            </TableCell>
-          </TableRow>
-        ))}
-      ></DefaultTable>
+      <ThemeProvider theme={theme}>
+        <Navbar />
+        <Container sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+          <Typography color="primary" variant="h4">
+            Dashboard
+          </Typography>
+        </Container>
+        <Container sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => handleShowArchivedTasks()}
+          >
+            {showArchived ? (
+              <Container>
+                <Typography>Show All</Typography>
+                <UnarchiveIcon />
+              </Container>
+            ) : (
+              <Container>
+                <Typography>Hide Archived</Typography>
+                <ArchiveIcon />
+              </Container>
+            )}
+          </Button>
+        </Container>
+        <DefaultTable
+          headers={["Name", "Description", "Status", " "]}
+          data={tableData.map((task: any) => (
+            <TableRow key={task.id}>
+              <TableCell>{task.name}</TableCell>
+              <TableCell>{task.description}</TableCell>
+              <TableCell>{task.status}</TableCell>
+              <TableCell>
+                <Tooltip title="Update">
+                  <Button
+                    variant="contained"
+                    id={task.id}
+                    onClick={(e) => handleClick(e)}
+                  >
+                    Update
+                  </Button>
+                </Tooltip>
+                <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                  <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
+                    In Progress
+                  </MenuItem>
+                  <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
+                    Done
+                  </MenuItem>
+                </Menu>
+              </TableCell>
+            </TableRow>
+          ))}
+        ></DefaultTable>
+      </ThemeProvider>
     </React.Fragment>
   );
 };
