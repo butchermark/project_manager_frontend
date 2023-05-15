@@ -11,11 +11,16 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { EStatus } from "../../shared/status.enum";
 
 export const EditProjectPanel = (props: any) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [admins, setAdmins] = useState([]);
   const [addAdminButtonText, setAddAdminButtonText] = useState("Add admin");
+  const [statusAnchorEl, setStatusAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const statusOpen = Boolean(statusAnchorEl);
+  const [addStatusButtonText, setAddStatusButtonText] = useState("Add status");
   const open = Boolean(anchorEl);
   useEffect(() => {
     const gettAllAdmins = async () => {
@@ -50,6 +55,19 @@ export const EditProjectPanel = (props: any) => {
   const handleSubmit = () => {
     props.submit();
     props.changeadminbuttontext(false);
+  };
+  const handleCloseStatus = () => {
+    setStatusAnchorEl(null);
+  };
+
+  const handleSelectStatus = (status: string) => {
+    props.projectstatus(status);
+    setAddStatusButtonText(status);
+    setStatusAnchorEl(null);
+  };
+
+  const handleClickOnStatusDropDown = (event: any) => {
+    setStatusAnchorEl(event.currentTarget);
   };
 
   return (
@@ -97,10 +115,24 @@ export const EditProjectPanel = (props: any) => {
             onChange={(e) => props.projectdescription(e)}
           />
           <Typography>Status</Typography>
-          <TextField
-            sx={{ height: "30px", marginBottom: 3 }}
-            onChange={(e) => props.projectstatus(e)}
-          />
+          <Tooltip title="Update" onClick={handleClickOnStatusDropDown}>
+            <Button variant="contained">{addStatusButtonText}</Button>
+          </Tooltip>
+          <Menu
+            anchorEl={statusAnchorEl}
+            open={statusOpen}
+            onClose={handleCloseStatus}
+          >
+            <MenuItem onClick={() => handleSelectStatus(EStatus.DONE)}>
+              {EStatus.DONE}
+            </MenuItem>
+            <MenuItem onClick={() => handleSelectStatus(EStatus.TO_DO)}>
+              {EStatus.TO_DO}
+            </MenuItem>
+            <MenuItem onClick={() => handleSelectStatus(EStatus.IN_PROGRESS)}>
+              {EStatus.IN_PROGRESS}
+            </MenuItem>
+          </Menu>
           <Typography>Admin</Typography>
           <Tooltip title="Add to project">
             <Button

@@ -13,11 +13,11 @@ import {
   MenuItem,
   ListItemIcon,
   createTheme,
-  Container,
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { ReactComponent as Logo } from "../UI/logo/logo.svg";
 import { useNavigate } from "react-router-dom";
+import "./responsive.css";
 
 export const Navbar = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -44,6 +44,7 @@ export const Navbar = () => {
   };
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
     setAnchorEl(null);
     navigate("/login");
   };
@@ -75,7 +76,7 @@ export const Navbar = () => {
       {user.isAdmin ? (
         <ThemeProvider theme={theme}>
           <AppBar position="static">
-            <Toolbar>
+            <Toolbar className="navbar-toolbar">
               <Logo />
               <Typography
                 display={"flex"}

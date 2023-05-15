@@ -16,6 +16,7 @@ import {
 import ArchiveIcon from "@mui/icons-material/Archive";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import { ThemeProvider } from "@emotion/react";
+import { EStatus } from "../../shared/status.enum";
 
 export const DashBoardPage = () => {
   const [taskStatus, setTaskStatus] = useState("");
@@ -155,10 +156,13 @@ export const DashBoardPage = () => {
                 </Tooltip>
                 <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
                   <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
-                    In Progress
+                    {EStatus.DONE}
                   </MenuItem>
                   <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
-                    Done
+                    {EStatus.TO_DO}
+                  </MenuItem>
+                  <MenuItem id={task.id} onClick={(e) => handleUpdate(e)}>
+                    {EStatus.IN_PROGRESS}
                   </MenuItem>
                 </Menu>
               </TableCell>

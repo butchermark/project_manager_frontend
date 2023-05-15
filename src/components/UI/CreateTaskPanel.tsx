@@ -12,13 +12,19 @@ import {
 import AddCircleOutLineIcon from "@mui/icons-material/AddCircle";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { EStatus } from "../../shared/status.enum";
 
 export const CreateTaskPanel = (props: any) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const [projectAnchorEl, setProjectAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const [statusAnchorEl, setStatusAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const projectOpen = Boolean(projectAnchorEl);
+  const statusOpen = Boolean(statusAnchorEl);
   const [projects, setProjects] = useState([]);
   const [addProjectButtonText, setAddProjectButtonText] =
     useState("Add to project");
+  const [addStatusButtonText, setAddStatusButtonText] = useState("Add status");
 
   useEffect(() => {
     const getAllProjects = async () => {
@@ -39,17 +45,31 @@ export const CreateTaskPanel = (props: any) => {
     getAllProjects();
   }, []);
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleCloseProject = () => {
+    setProjectAnchorEl(null);
+  };
+
+  const handleCloseStatus = () => {
+    setStatusAnchorEl(null);
   };
 
   const handleSelectProject = (projectId: string, projectName: string) => {
     props.projectId(projectId);
     setAddProjectButtonText(projectName);
-    setAnchorEl(null);
+    setProjectAnchorEl(null);
   };
-  const handleClickOnDropDown = (event: any) => {
-    setAnchorEl(event.currentTarget);
+
+  const handleSelectStatus = (status: string) => {
+    props.taskstatus(status);
+    setAddStatusButtonText(status);
+    setStatusAnchorEl(null);
+  };
+  const handleClickOnProjectDropDown = (event: any) => {
+    setProjectAnchorEl(event.currentTarget);
+  };
+
+  const handleClickOnStatusDropDown = (event: any) => {
+    setStatusAnchorEl(event.currentTarget);
   };
 
   const handleSubmit = () => {
@@ -96,21 +116,38 @@ export const CreateTaskPanel = (props: any) => {
           <Typography>Description</Typography>
           <TextField onChange={(e) => props.taskdescription(e)} />
           <Typography>Status</Typography>
-          <TextField onChange={(e) => props.taskstatus(e)} />
+          <Tooltip title="Update" onClick={handleClickOnStatusDropDown}>
+            <Button variant="contained">{addStatusButtonText}</Button>
+          </Tooltip>
+          <Menu
+            anchorEl={statusAnchorEl}
+            open={statusOpen}
+            onClose={handleCloseStatus}
+          >
+            <MenuItem onClick={() => handleSelectStatus(EStatus.DONE)}>
+              {EStatus.DONE}
+            </MenuItem>
+            <MenuItem onClick={() => handleSelectStatus(EStatus.TO_DO)}>
+              {EStatus.TO_DO}
+            </MenuItem>
+            <MenuItem onClick={() => handleSelectStatus(EStatus.IN_PROGRESS)}>
+              {EStatus.IN_PROGRESS}
+            </MenuItem>
+          </Menu>
           <Typography>Project</Typography>
           <Tooltip title="Add to project">
             <Button
               variant="contained"
-              onClick={(e) => handleClickOnDropDown(e)}
+              onClick={(e) => handleClickOnProjectDropDown(e)}
             >
               {addProjectButtonText}
             </Button>
           </Tooltip>
           <Menu
-            anchorEl={anchorEl}
-            id="account-menu"
-            open={open}
-            onClose={handleClose}
+            anchorEl={projectAnchorEl}
+            id="status-menu"
+            open={projectOpen}
+            onClose={handleCloseProject}
           >
             {projects.map((project: any) => (
               <MenuItem

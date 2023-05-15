@@ -10,10 +10,29 @@ import {
   Tooltip,
 } from "@mui/material";
 import AddCircleOutLineIcon from "@mui/icons-material/AddCircle";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import { EStatus } from "../../shared/status.enum";
 
 export const CreateProjectPanel = (props: any) => {
+  const [statusAnchorEl, setStatusAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const statusOpen = Boolean(statusAnchorEl);
+  const [addStatusButtonText, setAddStatusButtonText] = useState("Add status");
+
+  const handleCloseStatus = () => {
+    setStatusAnchorEl(null);
+  };
+
+  const handleSelectStatus = (status: string) => {
+    props.projectstatus(status);
+    setAddStatusButtonText(status);
+    setStatusAnchorEl(null);
+  };
+
+  const handleClickOnStatusDropDown = (event: any) => {
+    setStatusAnchorEl(event.currentTarget);
+  };
+
   return (
     <Modal
       sx={{ display: "flex", alignItems: "center" }}
@@ -53,7 +72,24 @@ export const CreateProjectPanel = (props: any) => {
           <Typography>Description</Typography>
           <TextField onChange={(e) => props.projectdescription(e)} />
           <Typography>Status</Typography>
-          <TextField onChange={(e) => props.projectstatus(e)} />
+          <Tooltip title="Update" onClick={handleClickOnStatusDropDown}>
+            <Button variant="contained">{addStatusButtonText}</Button>
+          </Tooltip>
+          <Menu
+            anchorEl={statusAnchorEl}
+            open={statusOpen}
+            onClose={handleCloseStatus}
+          >
+            <MenuItem onClick={() => handleSelectStatus(EStatus.DONE)}>
+              {EStatus.DONE}
+            </MenuItem>
+            <MenuItem onClick={() => handleSelectStatus(EStatus.TO_DO)}>
+              {EStatus.TO_DO}
+            </MenuItem>
+            <MenuItem onClick={() => handleSelectStatus(EStatus.IN_PROGRESS)}>
+              {EStatus.IN_PROGRESS}
+            </MenuItem>
+          </Menu>
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
               color="success"

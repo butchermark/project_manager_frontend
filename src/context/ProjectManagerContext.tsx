@@ -8,7 +8,7 @@ export const ProjectManagerProvider = ({ children }: any) => {
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem("accessToken")
   );
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
 
   return (
     <ProjectManagerContext.Provider
@@ -17,8 +17,8 @@ export const ProjectManagerProvider = ({ children }: any) => {
         setAccessToken,
         loading,
         setLoading,
-        username,
-        setUsername,
+        email,
+        setEmail,
       }}
     >
       {children}

@@ -16,7 +16,7 @@ import { ReactComponent as Logo } from "../UI/logo/logoBig.svg";
 import { CreateUserPanel } from "../UI/CreateUserPanel";
 
 export const LoginPage = () => {
-  const { setAccessToken, setLoading, username, setUsername } = useContext(
+  const { setAccessToken, setLoading, email, setEmail } = useContext(
     ProjectManagerContext
   );
   const [password, setPassword] = useState("");
@@ -26,6 +26,7 @@ export const LoginPage = () => {
   const [userEmail, setCreateUserEmail] = useState("");
   const [userPassword, setCreateUserPassword] = useState("");
   const [isReload, setIsReload] = useState(true);
+  const [isLogin, setIsLogin] = useState(true);
   const regexExp =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/gi;
   let navigate = useNavigate();
@@ -46,7 +47,7 @@ export const LoginPage = () => {
         try {
           await axios
             .post("http://localhost:3000/auth/signin", {
-              name: username,
+              email: email,
               password: password,
             })
             .then((res) => {
@@ -67,7 +68,7 @@ export const LoginPage = () => {
             })
             .catch((err) => {
               setIsSubmit(false);
-              console.log(err);
+              setIsLogin(false);
             });
         } catch (err) {
           setLoading(false);
@@ -171,17 +172,19 @@ export const LoginPage = () => {
             flexDirection: "column",
           }}
         >
-          <Typography color="primary">Name</Typography>
+          <Typography color="primary">Email</Typography>
           <TextField
+            sx={[isLogin ? {} : { border: "1px solid red", borderRadius: 2 }]}
             type="text"
             className="login-input-field"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <Typography color="primary" sx={{ marginTop: 2 }}>
             Password
           </Typography>
           <TextField
+            sx={[isLogin ? {} : { border: "1px solid red", borderRadius: 2 }]}
             type="password"
             className="login-input-field"
             value={password}

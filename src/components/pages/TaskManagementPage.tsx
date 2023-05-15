@@ -38,6 +38,7 @@ export const TaskManagementPage = () => {
   const [projectId, setProjectId] = useState("");
   const [isReload, setIsReload] = useState(true);
   const [projectButtonText, setProjectButtonText] = useState(false);
+  const [statusButtonText, setStatusButtonText] = useState(false);
   const [showArchived, setShowArchived] = useState(true);
   const open = Boolean(anchorEl);
 
@@ -87,6 +88,7 @@ export const TaskManagementPage = () => {
     };
     fetchTasks();
     setProjectButtonText(true);
+    setStatusButtonText(true);
   }, [isReload, showArchived]);
 
   const createTask = useCallback(async () => {
@@ -118,6 +120,14 @@ export const TaskManagementPage = () => {
       console.log(err);
     }
     setCreatingTask(false);
+    setEditingTask(false);
+    setOriginalTaskDescription("");
+    setOriginalTaskName("");
+    setOriginalTaskStatus("");
+    setTaskId("");
+    setTaskName("");
+    setTaskDescription("");
+    setTaskStatus("");
   }, [taskName, taskDescription, taskStatus, projectId]);
 
   const editTask = useCallback(async () => {
@@ -143,7 +153,14 @@ export const TaskManagementPage = () => {
       console.log(err);
     }
     setEditingTask(false);
-  }, [taskId, taskName, taskDescription, taskStatus]);
+    setOriginalTaskDescription("");
+    setOriginalTaskName("");
+    setOriginalTaskStatus("");
+    setTaskId("");
+    setTaskName("");
+    setTaskDescription("");
+    setTaskStatus("");
+  }, [taskId, taskName, taskDescription, taskStatus, taskId]);
 
   const deleteTask = useCallback(async (taskId: string) => {
     try {
@@ -257,6 +274,7 @@ export const TaskManagementPage = () => {
   }, []);
 
   const handleStartEdit = (task: any) => {
+    console.log(originalTaskDescription, originalTaskName, originalTaskStatus);
     setTaskId(task.id);
     setOriginalTaskName(task.name);
     setOriginalTaskDescription(task.description);
@@ -312,7 +330,7 @@ export const TaskManagementPage = () => {
           submit={handleEdit}
           taskname={(e: any) => setTaskName(e.target.value)}
           taskdescription={(e: any) => setTaskDescription(e.target.value)}
-          taskstatus={(e: any) => setTaskStatus(e.target.value)}
+          taskstatus={setTaskStatus}
         ></EditTaskPanel>
         <CreateTaskPanel
           close={() => setCreatingTask(false)}
@@ -321,7 +339,8 @@ export const TaskManagementPage = () => {
           submit={handleCreateTask}
           taskname={(e: any) => setTaskName(e.target.value)}
           taskdescription={(e: any) => setTaskDescription(e.target.value)}
-          taskstatus={(e: any) => setTaskStatus(e.target.value)}
+          taskstatus={setTaskStatus}
+          taskbuttontext={statusButtonText}
           projectId={setProjectId}
           projectbuttontext={projectButtonText}
           changeprojectbuttontext={setProjectButtonText}

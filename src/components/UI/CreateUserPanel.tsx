@@ -48,7 +48,7 @@ export const CreateUserPanel = (props: any) => {
           <Typography>E-mail</Typography>
           <TextField onChange={(e) => props.useremail(e)} />
           <Typography>Password</Typography>
-          <TextField onChange={(e) => props.userpassword(e)} />
+          <TextField type="password" onChange={(e) => props.userpassword(e)} />
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
               color="success"

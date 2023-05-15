@@ -116,6 +116,15 @@ export const ProjectManagementPage = () => {
       console.log(err);
     }
     setCreatingProject(false);
+    setEditingProject(false);
+    setOriginalProjectDescription("");
+    setOriginalProjectName("");
+    setOriginalProjectStatus("");
+    setOriginalProjectManager("");
+    setProjectDescription("");
+    setProjectId("");
+    setProjectName("");
+    setProjectStatus("");
   }, [projectName, projectDescription, projectStatus, managerId]);
 
   const editProject = useCallback(async () => {
@@ -142,7 +151,15 @@ export const ProjectManagementPage = () => {
       console.log(err);
     }
     setEditingProject(false);
-  }, [admin, projectId, projectDescription, projectName]);
+    setOriginalProjectDescription("");
+    setOriginalProjectName("");
+    setOriginalProjectStatus("");
+    setOriginalProjectManager("");
+    setProjectDescription("");
+    setProjectId("");
+    setProjectName("");
+    setProjectStatus("");
+  }, [admin, projectId, projectDescription, projectName, projectStatus]);
 
   const deleteProject = useCallback(async (projectId: string) => {
     try {
@@ -259,7 +276,7 @@ export const ProjectManagementPage = () => {
           submit={handleEdit}
           projectname={(e: any) => setProjectName(e.target.value)}
           projectdescription={(e: any) => setProjectDescription(e.target.value)}
-          projectstatus={(e: any) => setProjectStatus(e.target.value)}
+          projectstatus={setProjectStatus}
           projectmanager={setAdmin}
           adminbuttontext={adminButtonText}
           changeadminbuttontext={setAdminButtonText}
@@ -271,7 +288,7 @@ export const ProjectManagementPage = () => {
           submit={handleCreate}
           projectname={(e: any) => setProjectName(e.target.value)}
           projectdescription={(e: any) => setProjectDescription(e.target.value)}
-          projectstatus={(e: any) => setProjectStatus(e.target.value)}
+          projectstatus={setProjectStatus}
         ></CreateProjectPanel>
         <Navbar />
         <Container sx={{ mt: 5, display: "flex", justifyContent: "center" }}>

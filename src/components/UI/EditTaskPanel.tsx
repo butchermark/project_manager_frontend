@@ -5,11 +5,35 @@ import {
   Typography,
   TextField,
   Button,
+  MenuItem,
+  Tooltip,
+  Menu,
 } from "@mui/material";
+import { EStatus } from "../../shared/status.enum";
+import React, { useState } from "react";
 
 export const EditTaskPanel = (props: any) => {
+  const [statusAnchorEl, setStatusAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const statusOpen = Boolean(statusAnchorEl);
+  const [addStatusButtonText, setAddStatusButtonText] = useState("Add status");
+
   const handleSubmit = () => {
     props.submit();
+  };
+
+  const handleSelectStatus = (status: string) => {
+    props.taskstatus(status);
+    setAddStatusButtonText(status);
+    setStatusAnchorEl(null);
+  };
+
+  const handleClickOnStatusDropDown = (event: any) => {
+    setStatusAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseStatus = () => {
+    setStatusAnchorEl(null);
   };
   return (
     <Modal
@@ -56,10 +80,24 @@ export const EditTaskPanel = (props: any) => {
             onChange={(e) => props.taskdescription(e)}
           />
           <Typography>Status</Typography>
-          <TextField
-            sx={{ height: "30px", marginBottom: 3 }}
-            onChange={(e) => props.taskstatus(e)}
-          />
+          <Tooltip title="Update" onClick={handleClickOnStatusDropDown}>
+            <Button variant="contained">{addStatusButtonText}</Button>
+          </Tooltip>
+          <Menu
+            anchorEl={statusAnchorEl}
+            open={statusOpen}
+            onClose={handleCloseStatus}
+          >
+            <MenuItem onClick={() => handleSelectStatus(EStatus.DONE)}>
+              {EStatus.DONE}
+            </MenuItem>
+            <MenuItem onClick={() => handleSelectStatus(EStatus.TO_DO)}>
+              {EStatus.TO_DO}
+            </MenuItem>
+            <MenuItem onClick={() => handleSelectStatus(EStatus.IN_PROGRESS)}>
+              {EStatus.IN_PROGRESS}
+            </MenuItem>
+          </Menu>
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
               onClick={handleSubmit}
