@@ -26,6 +26,8 @@ export const LoginPage = () => {
   const [userEmail, setCreateUserEmail] = useState("");
   const [userPassword, setCreateUserPassword] = useState("");
   const [isReload, setIsReload] = useState(true);
+  const regexExp =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/gi;
   let navigate = useNavigate();
   const theme = createTheme({
     palette: {
@@ -109,7 +111,13 @@ export const LoginPage = () => {
 
   const handleCreate = () => {
     setCreatingUser(false);
-    registration();
+    if (!userName || !userEmail || !userPassword) {
+      window.alert("Please fill all the fields");
+    } else if (regexExp.test(userEmail)) {
+      registration();
+    } else {
+      window.alert("Please enter a valid email");
+    }
   };
 
   return (

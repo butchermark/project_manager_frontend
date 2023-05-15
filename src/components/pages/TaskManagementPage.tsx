@@ -286,6 +286,14 @@ export const TaskManagementPage = () => {
     }
   };
 
+  const handleCreateTask = () => {
+    if (!taskName || !taskDescription || !taskStatus) {
+      window.alert("Please fill all fields");
+    } else {
+      createTask();
+    }
+  };
+
   const handleArchiveTask = (taskId: string, taskIsArchived: boolean) => {
     if (!taskIsArchived) {
       archiveTask(taskId);
@@ -310,7 +318,7 @@ export const TaskManagementPage = () => {
           close={() => setCreatingTask(false)}
           status={creatingTask}
           method={"Create task"}
-          submit={() => createTask()}
+          submit={handleCreateTask}
           taskname={(e: any) => setTaskName(e.target.value)}
           taskdescription={(e: any) => setTaskDescription(e.target.value)}
           taskstatus={(e: any) => setTaskStatus(e.target.value)}

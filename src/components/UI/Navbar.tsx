@@ -87,7 +87,11 @@ export const Navbar = () => {
               >
                 Project Manager
               </Typography>
-              <Stack sx={{ display: "flex" }} direction="row" spacing={2}>
+              <Stack
+                sx={{ display: "flex", flexWrap: "wrap" }}
+                direction="row"
+                spacing={2}
+              >
                 <Button
                   color="secondary"
                   sx={{

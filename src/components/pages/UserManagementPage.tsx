@@ -33,6 +33,8 @@ export const UserManagementPage = () => {
   const [originalUserName, setOriginalUserName] = useState("");
   const [originalUserEmail, setOriginalUserEmail] = useState("");
   const [isReload, setIsReload] = useState(true);
+  const regexExp =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/gi;
   const theme = createTheme({
     palette: {
       primary: {
@@ -191,8 +193,13 @@ export const UserManagementPage = () => {
   };
 
   const handleCreate = () => {
-    setCreatingUser(false);
-    createUser();
+    if (!userName || !userEmail || !userPassword) {
+      window.alert("Please fill all the fields");
+    } else if (regexExp.test(userEmail)) {
+      createUser();
+    } else {
+      window.alert("Please enter a valid email");
+    }
   };
 
   const handleStartEdit = (user: any) => {
@@ -203,7 +210,11 @@ export const UserManagementPage = () => {
   };
 
   const handleEdit = () => {
-    editUser();
+    if (regexExp.test(editUserEmail)) {
+      editUser();
+    } else {
+      window.alert("Please enter a valid email");
+    }
   };
 
   return (

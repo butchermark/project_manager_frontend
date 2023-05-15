@@ -19,7 +19,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { CreateProjectPanel } from "../UI/CreateProjectPanel";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
-import { arch } from "os";
+import { Console } from "console";
 
 export const ProjectManagementPage = () => {
   const managerId = JSON.parse(localStorage.getItem("user") ?? "").id;
@@ -215,7 +215,11 @@ export const ProjectManagementPage = () => {
   };
 
   const handleCreate = () => {
-    createProject();
+    if (!projectName || !projectDescription || !projectStatus) {
+      window.alert("Please fill all fields");
+    } else {
+      createProject();
+    }
   };
 
   const handleEdit = () => {
